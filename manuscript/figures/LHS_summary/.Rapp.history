@@ -1,0 +1,2405 @@
+#!/usr/bin/env Rscript#
+library(RSQLite)#
+library(ggplot2)#
+library(reshape2)#
+library(gridExtra)#
+library(grid)#
+library(sensitivity)#
+library(scales)#
+library(xtable)#
+library(gtable)#
+#
+#######################
+textSize = 6#
+pointSize = 1#
+lineSize = .8#
+plot_themes  = 	theme_classic() +#
+				theme(axis.line = element_line(size=.3)) +#
+				theme(axis.ticks = element_line(size=.3)) +#
+				theme(axis.ticks.length = unit(-.07,'cm')) +#
+				theme(axis.ticks.margin = unit(.11,'cm')) +#
+				theme(axis.title.x=element_text(size=textSize)) + #
+				theme(axis.text.x=element_text(size= textSize)) + #
+				theme(axis.title.y=element_text(size= textSize)) +#
+				theme(axis.text.y=element_text(size= textSize)) +#
+				theme(plot.title=element_text(size=textSize)) +#
+				theme(plot.margin=unit(c(3,3,3,3),'mm')) +#
+				theme(legend.title=element_text(size=textSize)) +#
+				theme(legend.text=element_text(size=textSize)) +#
+				theme(legend.position ='bottom') +#
+				theme(legend.direction='horizontal') +#
+				theme(legend.margin = unit(-.5,'cm')) +#
+				theme(panel.border = element_rect(colour = "black", fill=NA, size=.5)) +#
+				theme(axis.line = element_blank())#
+#
+resultsDir = '.'#
+resultsDb = 'results.sqlite'#
+#
+parNames = c('relativeR0','seasonalAmplitude','relativeN','relativeTurnover','tropicFractionI0')#
+defaults = c(1.0,1.0,1.0,1.0,0.0)#
+parDefaults = data.frame('relativeN'=1.0,'tropicFractionI0'=1.0,'relativeR0'=1.0,'relativeTurnover'=1.0,'seasonalAmplitude'=0.0)#
+#
+#################################
+#FIGURE S2#
+################################
+#
+resultsDb = paste(resultsDir,'results.sqlite',sep='/')#
+#
+parNames = c('relativeR0','relativeN','tropicFractionI0','relativeTurnover','seasonalAmplitude')#
+headerNames = c('Relative R0','Relative population size','Fraction of initial infecteds in tropics','Relative turnover','Seasonal amplitude')#
+headers = data.frame(parNames,headerNames)#
+comboDb = dbConnect(SQLite(), dbname = resultsDb)#
+initExtension(comboDb)#
+antigenDF = dbGetQuery(comboDb, paste('SELECT',paste(parNames,collapse=','),', tropicsTrunkPro, tropicsTrunkProSD, tropicsAgLag, tropicsAgLagSD, extinctions, excessDiversities, fluLike FROM AgLagTrunkPro',sep=' '))#
+#
+agAnova = aov(tropicsAgLag~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+trunkAnova = aov(tropicsTrunkPro~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+#
+plotDF = dbGetQuery(comboDb, paste('SELECT',paste(parNames,collapse=','),', tropicsTrunkPro, tropicsAgLag FROM pooled_results',sep=' '))#
+tTPsens = pcc(plotDF[,1:5], plotDF$tropicsTrunkPro,nboot=100)#
+tALsens = pcc(plotDF[,1:5], plotDF$tropicsAgLag,nboot=100)#
+#
+	fit = lm(tropicsAgLag~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+	plots=c()#
+	i = 1#
+	for(parName in parNames){#
+		print(parName)#
+		sens = tTPsens$PCC[i,]$'original' #
+		minCI = tTPsens$PCC[i,]$'min. c.i.'#
+		maxCI = tTPsens$PCC[i,]$'max. c.i.'#
+#
+		trunkProPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsTrunkPro")) + #
+			geom_point(size = .5) + #
+			xlab(NULL) +#
+			ylab(NULL) +#
+			ylim(c(0,1)) + #
+			theme_classic() + #
+			ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+			plot_themes +#
+			theme(axis.text.x=element_blank()) #
+		if(parName == parNames[1]){#
+			trunkProPlot = trunkProPlot +#
+				ylab("Tropics Trunk Proportion")#
+		}#
+		else{#
+			trunkProPlot = trunkProPlot +#
+				theme(axis.text.y=element_blank()) #
+		}#
+		if(i==1){#
+			trunkProPlotRow = ggplotGrob(trunkProPlot)#
+		}#
+		else{#
+			trunkProPlotRow = cbind(trunkProPlotRow,ggplotGrob(trunkProPlot),size='first')#
+		}#
+		i = i+1#
+	}	#
+	i=1#
+	for(parName in parNames){#
+		sens = round(tALsens$PCC[i,]$'original' ,2)#
+		minCI = round(tALsens$PCC[i,]$'min. c.i.',2)#
+		maxCI = round(tALsens$PCC[i,]$'max. c.i.',2)#
+		print(parName)		#
+		agLagPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsAgLag")) + #
+			geom_point(size = .5) + #
+			xlab(headers$headerNames[headers$parNames==parName]) + #
+			ylab(NULL) + #
+			ylim(c(-0.4,0.4)) + #
+			theme_classic() +#
+			ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+			plot_themes#
+		if(parName == parNames[1]){#
+			agLagPlot = agLagPlot +#
+				ylab("Tropics Antigenic Lead")#
+		}#
+		else{#
+			agLagPlot = agLagPlot +#
+				theme(axis.text.y=element_blank()) #
+		}#
+#
+		if(i==1){#
+			agLagPlotRow = ggplotGrob(agLagPlot)#
+		}#
+		else{#
+			agLagPlotRow = cbind(agLagPlotRow, ggplotGrob(agLagPlot), size='first')#
+		}#
+		i=i+1#
+	}#
+	figureS2 = rbind(trunkProPlotRow,agLagPlotRow,size='first')#
+	pdf('./Figure_S2.pdf',7,3.5)#
+	grid.draw(figureS2)#
+#
+	dev.off()#
+dbDisconnect(comboDb)#
+#
+print(xtable(summary(agAnova)))#
+print(xtable(summary(trunkAnova)))
+#!/usr/bin/env Rscript#
+library(RSQLite)#
+library(ggplot2)#
+library(reshape2)#
+library(gridExtra)#
+library(grid)#
+library(sensitivity)#
+library(scales)#
+library(xtable)#
+library(gtable)#
+#
+#######################
+textSize = 6#
+pointSize = 0.1#
+lineSize = .8#
+plot_themes  = 	theme_classic() +#
+				theme(axis.line = element_line(size=.3)) +#
+				theme(axis.ticks = element_line(size=.3)) +#
+				theme(axis.ticks.length = unit(-.07,'cm')) +#
+				theme(axis.ticks.margin = unit(.11,'cm')) +#
+				theme(axis.title.x=element_text(size=textSize)) + #
+				theme(axis.text.x=element_text(size= textSize)) + #
+				theme(axis.title.y=element_text(size= textSize)) +#
+				theme(axis.text.y=element_text(size= textSize)) +#
+				theme(plot.title=element_text(size=textSize)) +#
+				theme(plot.margin=unit(c(3,3,3,3),'mm')) +#
+				theme(legend.title=element_text(size=textSize)) +#
+				theme(legend.text=element_text(size=textSize)) +#
+				theme(legend.position ='bottom') +#
+				theme(legend.direction='horizontal') +#
+				theme(legend.margin = unit(-.5,'cm')) +#
+				theme(panel.border = element_rect(colour = "black", fill=NA, size=.5)) +#
+				theme(axis.line = element_blank())#
+#
+resultsDir = '.'#
+resultsDb = 'results.sqlite'#
+#
+parNames = c('relativeR0','seasonalAmplitude','relativeN','relativeTurnover','tropicFractionI0')#
+defaults = c(1.0,1.0,1.0,1.0,0.0)#
+parDefaults = data.frame('relativeN'=1.0,'tropicFractionI0'=1.0,'relativeR0'=1.0,'relativeTurnover'=1.0,'seasonalAmplitude'=0.0)#
+#
+#################################
+#FIGURE S2#
+################################
+#
+resultsDb = paste(resultsDir,'results.sqlite',sep='/')#
+#
+parNames = c('relativeR0','relativeN','tropicFractionI0','relativeTurnover','seasonalAmplitude')#
+headerNames = c('Relative R0','Relative population size','Fraction of initial infecteds in tropics','Relative turnover','Seasonal amplitude')#
+headers = data.frame(parNames,headerNames)#
+comboDb = dbConnect(SQLite(), dbname = resultsDb)#
+initExtension(comboDb)#
+antigenDF = dbGetQuery(comboDb, paste('SELECT',paste(parNames,collapse=','),', tropicsTrunkPro, tropicsTrunkProSD, tropicsAgLag, tropicsAgLagSD, extinctions, excessDiversities, fluLike FROM AgLagTrunkPro',sep=' '))#
+#
+agAnova = aov(tropicsAgLag~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+trunkAnova = aov(tropicsTrunkPro~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+#
+plotDF = dbGetQuery(comboDb, paste('SELECT',paste(parNames,collapse=','),', tropicsTrunkPro, tropicsAgLag FROM pooled_results',sep=' '))#
+tTPsens = pcc(plotDF[,1:5], plotDF$tropicsTrunkPro,nboot=100)#
+tALsens = pcc(plotDF[,1:5], plotDF$tropicsAgLag,nboot=100)#
+#
+	fit = lm(tropicsAgLag~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+	plots=c()#
+	i = 1#
+	for(parName in parNames){#
+		print(parName)#
+		sens = tTPsens$PCC[i,]$'original' #
+		minCI = tTPsens$PCC[i,]$'min. c.i.'#
+		maxCI = tTPsens$PCC[i,]$'max. c.i.'#
+#
+		trunkProPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsTrunkPro")) + #
+			geom_point(size = .5) + #
+			xlab(NULL) +#
+			ylab(NULL) +#
+			ylim(c(0,1)) + #
+			theme_classic() + #
+			ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+			plot_themes +#
+			theme(axis.text.x=element_blank()) #
+		if(parName == parNames[1]){#
+			trunkProPlot = trunkProPlot +#
+				ylab("Tropics Trunk Proportion")#
+		}#
+		else{#
+			trunkProPlot = trunkProPlot +#
+				theme(axis.text.y=element_blank()) #
+		}#
+		if(i==1){#
+			trunkProPlotRow = ggplotGrob(trunkProPlot)#
+		}#
+		else{#
+			trunkProPlotRow = cbind(trunkProPlotRow,ggplotGrob(trunkProPlot),size='first')#
+		}#
+		i = i+1#
+	}	#
+	i=1#
+	for(parName in parNames){#
+		sens = round(tALsens$PCC[i,]$'original' ,2)#
+		minCI = round(tALsens$PCC[i,]$'min. c.i.',2)#
+		maxCI = round(tALsens$PCC[i,]$'max. c.i.',2)#
+		print(parName)		#
+		agLagPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsAgLag")) + #
+			geom_point(size = .5) + #
+			xlab(headers$headerNames[headers$parNames==parName]) + #
+			ylab(NULL) + #
+			ylim(c(-0.4,0.4)) + #
+			theme_classic() +#
+			ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+			plot_themes#
+		if(parName == parNames[1]){#
+			agLagPlot = agLagPlot +#
+				ylab("Tropics Antigenic Lead")#
+		}#
+		else{#
+			agLagPlot = agLagPlot +#
+				theme(axis.text.y=element_blank()) #
+		}#
+#
+		if(i==1){#
+			agLagPlotRow = ggplotGrob(agLagPlot)#
+		}#
+		else{#
+			agLagPlotRow = cbind(agLagPlotRow, ggplotGrob(agLagPlot), size='first')#
+		}#
+		i=i+1#
+	}#
+	figureS2 = rbind(trunkProPlotRow,agLagPlotRow,size='first')#
+	pdf('./Figure_S2.pdf',7,3.5)#
+	grid.draw(figureS2)#
+#
+	dev.off()#
+dbDisconnect(comboDb)#
+#
+print(xtable(summary(agAnova)))#
+print(xtable(summary(trunkAnova)))
+#!/usr/bin/env Rscript#
+library(RSQLite)#
+library(ggplot2)#
+library(reshape2)#
+library(gridExtra)#
+library(grid)#
+library(sensitivity)#
+library(scales)#
+library(xtable)#
+library(gtable)#
+#
+#######################
+textSize = 6#
+pointSize = 0.05#
+lineSize = .8#
+plot_themes  = 	theme_classic() +#
+				theme(axis.line = element_line(size=.3)) +#
+				theme(axis.ticks = element_line(size=.3)) +#
+				theme(axis.ticks.length = unit(-.07,'cm')) +#
+				theme(axis.ticks.margin = unit(.11,'cm')) +#
+				theme(axis.title.x=element_text(size=textSize)) + #
+				theme(axis.text.x=element_text(size= textSize)) + #
+				theme(axis.title.y=element_text(size= textSize)) +#
+				theme(axis.text.y=element_text(size= textSize)) +#
+				theme(plot.title=element_text(size=textSize)) +#
+				theme(plot.margin=unit(c(3,3,3,3),'mm')) +#
+				theme(legend.title=element_text(size=textSize)) +#
+				theme(legend.text=element_text(size=textSize)) +#
+				theme(legend.position ='bottom') +#
+				theme(legend.direction='horizontal') +#
+				theme(legend.margin = unit(-.5,'cm')) +#
+				theme(panel.border = element_rect(colour = "black", fill=NA, size=.5)) +#
+				theme(axis.line = element_blank())#
+#
+resultsDir = '.'#
+resultsDb = 'results.sqlite'#
+#
+parNames = c('relativeR0','seasonalAmplitude','relativeN','relativeTurnover','tropicFractionI0')#
+defaults = c(1.0,1.0,1.0,1.0,0.0)#
+parDefaults = data.frame('relativeN'=1.0,'tropicFractionI0'=1.0,'relativeR0'=1.0,'relativeTurnover'=1.0,'seasonalAmplitude'=0.0)#
+#
+#################################
+#FIGURE S2#
+################################
+#
+resultsDb = paste(resultsDir,'results.sqlite',sep='/')#
+#
+parNames = c('relativeR0','relativeN','tropicFractionI0','relativeTurnover','seasonalAmplitude')#
+headerNames = c('Relative R0','Relative population size','Fraction of initial infecteds in tropics','Relative turnover','Seasonal amplitude')#
+headers = data.frame(parNames,headerNames)#
+comboDb = dbConnect(SQLite(), dbname = resultsDb)#
+initExtension(comboDb)#
+antigenDF = dbGetQuery(comboDb, paste('SELECT',paste(parNames,collapse=','),', tropicsTrunkPro, tropicsTrunkProSD, tropicsAgLag, tropicsAgLagSD, extinctions, excessDiversities, fluLike FROM AgLagTrunkPro',sep=' '))#
+#
+agAnova = aov(tropicsAgLag~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+trunkAnova = aov(tropicsTrunkPro~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+#
+plotDF = dbGetQuery(comboDb, paste('SELECT',paste(parNames,collapse=','),', tropicsTrunkPro, tropicsAgLag FROM pooled_results',sep=' '))#
+tTPsens = pcc(plotDF[,1:5], plotDF$tropicsTrunkPro,nboot=100)#
+tALsens = pcc(plotDF[,1:5], plotDF$tropicsAgLag,nboot=100)#
+#
+fit = lm(tropicsAgLag~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+plots=c()#
+#
+i = 1#
+for(parName in parNames){#
+	print(parName)#
+	sens = tTPsens$PCC[i,]$'original' #
+	minCI = tTPsens$PCC[i,]$'min. c.i.'#
+	maxCI = tTPsens$PCC[i,]$'max. c.i.'#
+#
+	trunkProPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsTrunkPro")) + #
+		geom_point(size = .5) + #
+		xlab(NULL) +#
+		ylab(NULL) +#
+		ylim(c(0,1)) + #
+		theme_classic() + #
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes +#
+		theme(axis.text.x=element_blank()) #
+	if(parName == parNames[1]){#
+		trunkProPlot = trunkProPlot +#
+			ylab("Tropics Trunk Proportion")#
+	}#
+	else{#
+		trunkProPlot = trunkProPlot +#
+			theme(axis.text.y=element_blank()) #
+	}#
+	if(i==1){#
+		trunkProPlotRow = ggplotGrob(trunkProPlot)#
+	}#
+	else{#
+		trunkProPlotRow = cbind(trunkProPlotRow,ggplotGrob(trunkProPlot),size='first')#
+	}#
+	i = i+1#
+}	#
+#
+i=1#
+for(parName in parNames){#
+	sens = round(tALsens$PCC[i,]$'original' ,2)#
+	minCI = round(tALsens$PCC[i,]$'min. c.i.',2)#
+	maxCI = round(tALsens$PCC[i,]$'max. c.i.',2)#
+#
+	print(parName)		#
+	agLagPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsAgLag")) + #
+		geom_point(size = .5) + #
+		xlab(headers$headerNames[headers$parNames==parName]) + #
+		ylab(NULL) + #
+		ylim(c(-0.4,0.4)) + #
+		theme_classic() +#
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes#
+	if(parName == parNames[1]){#
+		agLagPlot = agLagPlot +#
+			ylab("Tropics Antigenic Lead")#
+	}#
+	else{#
+		agLagPlot = agLagPlot +#
+			theme(axis.text.y=element_blank()) #
+	}#
+#
+	if(i==1){#
+		agLagPlotRow = ggplotGrob(agLagPlot)#
+	}#
+	else{#
+		agLagPlotRow = cbind(agLagPlotRow, ggplotGrob(agLagPlot), size='first')#
+	}#
+	i=i+1#
+}#
+figureS2 = rbind(trunkProPlotRow,agLagPlotRow,size='first')#
+pdf('./Figure_S2.pdf',7,3.5)#
+grid.draw(figureS2)#
+dev.off()#
+dbDisconnect(comboDb)#
+#
+print(xtable(summary(agAnova)))#
+print(xtable(summary(trunkAnova)))
+#!/usr/bin/env Rscript#
+library(RSQLite)#
+library(ggplot2)#
+library(reshape2)#
+library(gridExtra)#
+library(grid)#
+library(sensitivity)#
+library(scales)#
+library(xtable)#
+library(gtable)#
+#
+#######################
+textSize = 6#
+pointSize = 0.1#
+lineSize = .8#
+plot_themes  = 	theme_classic() +#
+				theme(axis.line = element_line(size=.3)) +#
+				theme(axis.ticks = element_line(size=.3)) +#
+				theme(axis.ticks.length = unit(-.07,'cm')) +#
+				theme(axis.ticks.margin = unit(.11,'cm')) +#
+				theme(axis.title.x=element_text(size=textSize)) + #
+				theme(axis.text.x=element_text(size= textSize)) + #
+				theme(axis.title.y=element_text(size= textSize)) +#
+				theme(axis.text.y=element_text(size= textSize)) +#
+				theme(plot.title=element_text(size=textSize)) +#
+				theme(plot.margin=unit(c(3,3,3,3),'mm')) +#
+				theme(legend.title=element_text(size=textSize)) +#
+				theme(legend.text=element_text(size=textSize)) +#
+				theme(legend.position ='bottom') +#
+				theme(legend.direction='horizontal') +#
+				theme(legend.margin = unit(-.5,'cm')) +#
+				theme(panel.border = element_rect(colour = "black", fill=NA, size=.5)) +#
+				theme(axis.line = element_blank())#
+#
+resultsDir = '.'#
+resultsDb = 'results.sqlite'#
+#
+parNames = c('relativeR0','seasonalAmplitude','relativeN','relativeTurnover','tropicFractionI0')#
+defaults = c(1.0,1.0,1.0,1.0,0.0)#
+parDefaults = data.frame('relativeN'=1.0,'tropicFractionI0'=1.0,'relativeR0'=1.0,'relativeTurnover'=1.0,'seasonalAmplitude'=0.0)#
+#
+#################################
+#FIGURE S2#
+################################
+#
+resultsDb = paste(resultsDir,'results.sqlite',sep='/')#
+#
+parNames = c('relativeR0','relativeN','tropicFractionI0','relativeTurnover','seasonalAmplitude')#
+headerNames = c('Relative R0','Relative population size','Fraction of initial infecteds in tropics','Relative turnover','Seasonal amplitude')#
+headers = data.frame(parNames,headerNames)#
+comboDb = dbConnect(SQLite(), dbname = resultsDb)#
+initExtension(comboDb)#
+antigenDF = dbGetQuery(comboDb, paste('SELECT',paste(parNames,collapse=','),', tropicsTrunkPro, tropicsTrunkProSD, tropicsAgLag, tropicsAgLagSD, extinctions, excessDiversities, fluLike FROM AgLagTrunkPro',sep=' '))#
+#
+agAnova = aov(tropicsAgLag~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+trunkAnova = aov(tropicsTrunkPro~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+#
+plotDF = dbGetQuery(comboDb, paste('SELECT',paste(parNames,collapse=','),', tropicsTrunkPro, tropicsAgLag FROM pooled_results',sep=' '))#
+tTPsens = pcc(plotDF[,1:5], plotDF$tropicsTrunkPro,nboot=100)#
+tALsens = pcc(plotDF[,1:5], plotDF$tropicsAgLag,nboot=100)#
+#
+fit = lm(tropicsAgLag~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+plots=c()#
+#
+i = 1#
+for(parName in parNames){#
+	print(parName)#
+	sens = tTPsens$PCC[i,]$'original' #
+	minCI = tTPsens$PCC[i,]$'min. c.i.'#
+	maxCI = tTPsens$PCC[i,]$'max. c.i.'#
+#
+	trunkProPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsTrunkPro")) + #
+		geom_point(size = pointSize) + #
+		xlab(NULL) +#
+		ylab(NULL) +#
+		ylim(c(0,1)) + #
+		theme_classic() + #
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes +#
+		theme(axis.text.x=element_blank()) #
+	if(parName == parNames[1]){#
+		trunkProPlot = trunkProPlot +#
+			ylab("Tropics Trunk Proportion")#
+	}#
+	else{#
+		trunkProPlot = trunkProPlot +#
+			theme(axis.text.y=element_blank()) #
+	}#
+	if(i==1){#
+		trunkProPlotRow = ggplotGrob(trunkProPlot)#
+	}#
+	else{#
+		trunkProPlotRow = cbind(trunkProPlotRow,ggplotGrob(trunkProPlot),size='first')#
+	}#
+	i = i+1#
+}	#
+#
+i=1#
+for(parName in parNames){#
+	sens = round(tALsens$PCC[i,]$'original' ,2)#
+	minCI = round(tALsens$PCC[i,]$'min. c.i.',2)#
+	maxCI = round(tALsens$PCC[i,]$'max. c.i.',2)#
+#
+	print(parName)		#
+	agLagPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsAgLag")) + #
+		geom_point(size = pointSize) + #
+		xlab(headers$headerNames[headers$parNames==parName]) + #
+		ylab(NULL) + #
+		ylim(c(-0.4,0.4)) + #
+		theme_classic() +#
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes#
+	if(parName == parNames[1]){#
+		agLagPlot = agLagPlot +#
+			ylab("Tropics Antigenic Lead")#
+	}#
+	else{#
+		agLagPlot = agLagPlot +#
+			theme(axis.text.y=element_blank()) #
+	}#
+#
+	if(i==1){#
+		agLagPlotRow = ggplotGrob(agLagPlot)#
+	}#
+	else{#
+		agLagPlotRow = cbind(agLagPlotRow, ggplotGrob(agLagPlot), size='first')#
+	}#
+	i=i+1#
+}#
+figureS2 = rbind(trunkProPlotRow,agLagPlotRow,size='first')#
+pdf('./Figure_S2.pdf',7,3.5)#
+grid.draw(figureS2)#
+dev.off()#
+dbDisconnect(comboDb)#
+#
+print(xtable(summary(agAnova)))#
+print(xtable(summary(trunkAnova)))
+#!/usr/bin/env Rscript#
+library(RSQLite)#
+library(ggplot2)#
+library(reshape2)#
+library(gridExtra)#
+library(grid)#
+library(sensitivity)#
+library(scales)#
+library(xtable)#
+library(gtable)#
+#
+#######################
+textSize = 6#
+pointSize = 0.05#
+lineSize = .8#
+plot_themes  = 	theme_classic() +#
+				theme(axis.line = element_line(size=.3)) +#
+				theme(axis.ticks = element_line(size=.3)) +#
+				theme(axis.ticks.length = unit(-.07,'cm')) +#
+				theme(axis.ticks.margin = unit(.11,'cm')) +#
+				theme(axis.title.x=element_text(size=textSize)) + #
+				theme(axis.text.x=element_text(size= textSize)) + #
+				theme(axis.title.y=element_text(size= textSize)) +#
+				theme(axis.text.y=element_text(size= textSize)) +#
+				theme(plot.title=element_text(size=textSize)) +#
+				theme(plot.margin=unit(c(3,3,3,3),'mm')) +#
+				theme(legend.title=element_text(size=textSize)) +#
+				theme(legend.text=element_text(size=textSize)) +#
+				theme(legend.position ='bottom') +#
+				theme(legend.direction='horizontal') +#
+				theme(legend.margin = unit(-.5,'cm')) +#
+				theme(panel.border = element_rect(colour = "black", fill=NA, size=.5)) +#
+				theme(axis.line = element_blank())#
+#
+resultsDir = '.'#
+resultsDb = 'results.sqlite'#
+#
+parNames = c('relativeR0','seasonalAmplitude','relativeN','relativeTurnover','tropicFractionI0')#
+defaults = c(1.0,1.0,1.0,1.0,0.0)#
+parDefaults = data.frame('relativeN'=1.0,'tropicFractionI0'=1.0,'relativeR0'=1.0,'relativeTurnover'=1.0,'seasonalAmplitude'=0.0)#
+#
+#################################
+#FIGURE S2#
+################################
+#
+resultsDb = paste(resultsDir,'results.sqlite',sep='/')#
+#
+parNames = c('relativeR0','relativeN','tropicFractionI0','relativeTurnover','seasonalAmplitude')#
+headerNames = c('Relative R0','Relative population size','Fraction of initial infecteds in tropics','Relative turnover','Seasonal amplitude')#
+headers = data.frame(parNames,headerNames)#
+comboDb = dbConnect(SQLite(), dbname = resultsDb)#
+initExtension(comboDb)#
+antigenDF = dbGetQuery(comboDb, paste('SELECT',paste(parNames,collapse=','),', tropicsTrunkPro, tropicsTrunkProSD, tropicsAgLag, tropicsAgLagSD, extinctions, excessDiversities, fluLike FROM AgLagTrunkPro',sep=' '))#
+#
+agAnova = aov(tropicsAgLag~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+trunkAnova = aov(tropicsTrunkPro~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+#
+plotDF = dbGetQuery(comboDb, paste('SELECT',paste(parNames,collapse=','),', tropicsTrunkPro, tropicsAgLag FROM pooled_results',sep=' '))#
+tTPsens = pcc(plotDF[,1:5], plotDF$tropicsTrunkPro,nboot=100)#
+tALsens = pcc(plotDF[,1:5], plotDF$tropicsAgLag,nboot=100)#
+#
+fit = lm(tropicsAgLag~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+plots=c()#
+#
+i = 1#
+for(parName in parNames){#
+	print(parName)#
+	sens = tTPsens$PCC[i,]$'original' #
+	minCI = tTPsens$PCC[i,]$'min. c.i.'#
+	maxCI = tTPsens$PCC[i,]$'max. c.i.'#
+#
+	trunkProPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsTrunkPro")) + #
+		geom_point(size = pointSize) + #
+		xlab(NULL) +#
+		ylab(NULL) +#
+		ylim(c(0,1)) + #
+		theme_classic() + #
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes +#
+		theme(axis.text.x=element_blank()) #
+	if(parName == parNames[1]){#
+		trunkProPlot = trunkProPlot +#
+			ylab("Tropics Trunk Proportion")#
+	}#
+	else{#
+		trunkProPlot = trunkProPlot +#
+			theme(axis.text.y=element_blank()) #
+	}#
+	if(i==1){#
+		trunkProPlotRow = ggplotGrob(trunkProPlot)#
+	}#
+	else{#
+		trunkProPlotRow = cbind(trunkProPlotRow,ggplotGrob(trunkProPlot),size='first')#
+	}#
+	i = i+1#
+}	#
+#
+i=1#
+for(parName in parNames){#
+	sens = round(tALsens$PCC[i,]$'original' ,2)#
+	minCI = round(tALsens$PCC[i,]$'min. c.i.',2)#
+	maxCI = round(tALsens$PCC[i,]$'max. c.i.',2)#
+#
+	print(parName)		#
+	agLagPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsAgLag")) + #
+		geom_point(size = pointSize) + #
+		xlab(headers$headerNames[headers$parNames==parName]) + #
+		ylab(NULL) + #
+		ylim(c(-0.4,0.4)) + #
+		theme_classic() +#
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes#
+	if(parName == parNames[1]){#
+		agLagPlot = agLagPlot +#
+			ylab("Tropics Antigenic Lead")#
+	}#
+	else{#
+		agLagPlot = agLagPlot +#
+			theme(axis.text.y=element_blank()) #
+	}#
+#
+	if(i==1){#
+		agLagPlotRow = ggplotGrob(agLagPlot)#
+	}#
+	else{#
+		agLagPlotRow = cbind(agLagPlotRow, ggplotGrob(agLagPlot), size='first')#
+	}#
+	i=i+1#
+}#
+figureS2 = rbind(trunkProPlotRow,agLagPlotRow,size='first')#
+pdf('./Figure_S2.pdf',7,3.5)#
+grid.draw(figureS2)#
+dev.off()#
+dbDisconnect(comboDb)#
+#
+print(xtable(summary(agAnova)))#
+print(xtable(summary(trunkAnova)))
+#!/usr/bin/env Rscript#
+library(RSQLite)#
+library(ggplot2)#
+library(reshape2)#
+library(gridExtra)#
+library(grid)#
+library(sensitivity)#
+library(scales)#
+library(xtable)#
+library(gtable)#
+#
+#######################
+textSize = 6#
+pointSize = 0.01#
+lineSize = .8#
+plot_themes  = 	theme_classic() +#
+				theme(axis.line = element_line(size=.3)) +#
+				theme(axis.ticks = element_line(size=.3)) +#
+				theme(axis.ticks.length = unit(-.07,'cm')) +#
+				theme(axis.ticks.margin = unit(.11,'cm')) +#
+				theme(axis.title.x=element_text(size=textSize)) + #
+				theme(axis.text.x=element_text(size= textSize)) + #
+				theme(axis.title.y=element_text(size= textSize)) +#
+				theme(axis.text.y=element_text(size= textSize)) +#
+				theme(plot.title=element_text(size=textSize)) +#
+				theme(plot.margin=unit(c(3,3,3,3),'mm')) +#
+				theme(legend.title=element_text(size=textSize)) +#
+				theme(legend.text=element_text(size=textSize)) +#
+				theme(legend.position ='bottom') +#
+				theme(legend.direction='horizontal') +#
+				theme(legend.margin = unit(-.5,'cm')) +#
+				theme(panel.border = element_rect(colour = "black", fill=NA, size=.5)) +#
+				theme(axis.line = element_blank())#
+#
+resultsDir = '.'#
+resultsDb = 'results.sqlite'#
+#
+parNames = c('relativeR0','seasonalAmplitude','relativeN','relativeTurnover','tropicFractionI0')#
+defaults = c(1.0,1.0,1.0,1.0,0.0)#
+parDefaults = data.frame('relativeN'=1.0,'tropicFractionI0'=1.0,'relativeR0'=1.0,'relativeTurnover'=1.0,'seasonalAmplitude'=0.0)#
+#
+#################################
+#FIGURE S2#
+################################
+#
+resultsDb = paste(resultsDir,'results.sqlite',sep='/')#
+#
+parNames = c('relativeR0','relativeN','tropicFractionI0','relativeTurnover','seasonalAmplitude')#
+headerNames = c('Relative R0','Relative population size','Fraction of initial infecteds in tropics','Relative turnover','Seasonal amplitude')#
+headers = data.frame(parNames,headerNames)#
+comboDb = dbConnect(SQLite(), dbname = resultsDb)#
+initExtension(comboDb)#
+antigenDF = dbGetQuery(comboDb, paste('SELECT',paste(parNames,collapse=','),', tropicsTrunkPro, tropicsTrunkProSD, tropicsAgLag, tropicsAgLagSD, extinctions, excessDiversities, fluLike FROM AgLagTrunkPro',sep=' '))#
+#
+agAnova = aov(tropicsAgLag~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+trunkAnova = aov(tropicsTrunkPro~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+#
+plotDF = dbGetQuery(comboDb, paste('SELECT',paste(parNames,collapse=','),', tropicsTrunkPro, tropicsAgLag FROM pooled_results',sep=' '))#
+tTPsens = pcc(plotDF[,1:5], plotDF$tropicsTrunkPro,nboot=100)#
+tALsens = pcc(plotDF[,1:5], plotDF$tropicsAgLag,nboot=100)#
+#
+fit = lm(tropicsAgLag~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+plots=c()#
+#
+i = 1#
+for(parName in parNames){#
+	print(parName)#
+	sens = tTPsens$PCC[i,]$'original' #
+	minCI = tTPsens$PCC[i,]$'min. c.i.'#
+	maxCI = tTPsens$PCC[i,]$'max. c.i.'#
+#
+	trunkProPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsTrunkPro")) + #
+		geom_point(size = pointSize) + #
+		xlab(NULL) +#
+		ylab(NULL) +#
+		ylim(c(0,1)) + #
+		theme_classic() + #
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes +#
+		theme(axis.text.x=element_blank()) #
+	if(parName == parNames[1]){#
+		trunkProPlot = trunkProPlot +#
+			ylab("Tropics Trunk Proportion")#
+		trunkProPlotRow = ggplotGrob(trunkProPlot)#
+#
+	}#
+	else{#
+		trunkProPlot = trunkProPlot +#
+			theme(axis.text.y=element_blank()) #
+		trunkProPlotRow = cbind(trunkProPlotRow,ggplotGrob(trunkProPlot),size='first')#
+	}#
+}	#
+#
+i=1#
+for(parName in parNames){#
+	sens = round(tALsens$PCC[i,]$'original' ,2)#
+	minCI = round(tALsens$PCC[i,]$'min. c.i.',2)#
+	maxCI = round(tALsens$PCC[i,]$'max. c.i.',2)#
+#
+	print(parName)		#
+	agLagPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsAgLag")) + #
+		geom_point(size = pointSize) + #
+		xlab(headers$headerNames[headers$parNames==parName]) + #
+		ylab(NULL) + #
+		ylim(c(-0.4,0.4)) + #
+		theme_classic() +#
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes#
+	if(parName == parNames[1]){#
+		agLagPlot = agLagPlot +#
+			ylab("Tropics Antigenic Lead")#
+	}#
+	else{#
+		agLagPlot = agLagPlot +#
+			theme(axis.text.y=element_blank()) #
+	}#
+#
+	if(i==1){#
+		agLagPlotRow = ggplotGrob(agLagPlot)#
+	}#
+	else{#
+		agLagPlotRow = cbind(agLagPlotRow, ggplotGrob(agLagPlot), size='first')#
+	}#
+	i=i+1#
+}#
+figureS2 = rbind(trunkProPlotRow,agLagPlotRow,size='first')#
+pdf('./Figure_S2.pdf',7,3.5)#
+grid.draw(figureS2)#
+dev.off()#
+dbDisconnect(comboDb)#
+#
+print(xtable(summary(agAnova)))#
+print(xtable(summary(trunkAnova)))
+#!/usr/bin/env Rscript#
+library(RSQLite)#
+library(ggplot2)#
+library(reshape2)#
+library(gridExtra)#
+library(grid)#
+library(sensitivity)#
+library(scales)#
+library(xtable)#
+library(gtable)#
+#
+#######################
+textSize = 6#
+pointSize = 0.001#
+lineSize = .8#
+plot_themes  = 	theme_classic() +#
+				theme(axis.line = element_line(size=.3)) +#
+				theme(axis.ticks = element_line(size=.3)) +#
+				theme(axis.ticks.length = unit(-.07,'cm')) +#
+				theme(axis.ticks.margin = unit(.11,'cm')) +#
+				theme(axis.title.x=element_text(size=textSize)) + #
+				theme(axis.text.x=element_text(size= textSize)) + #
+				theme(axis.title.y=element_text(size= textSize)) +#
+				theme(axis.text.y=element_text(size= textSize)) +#
+				theme(plot.title=element_text(size=textSize)) +#
+				theme(plot.margin=unit(c(3,3,3,3),'mm')) +#
+				theme(legend.title=element_text(size=textSize)) +#
+				theme(legend.text=element_text(size=textSize)) +#
+				theme(legend.position ='bottom') +#
+				theme(legend.direction='horizontal') +#
+				theme(legend.margin = unit(-.5,'cm')) +#
+				theme(panel.border = element_rect(colour = "black", fill=NA, size=.5)) +#
+				theme(axis.line = element_blank())#
+#
+resultsDir = '.'#
+resultsDb = 'results.sqlite'#
+#
+parNames = c('relativeR0','seasonalAmplitude','relativeN','relativeTurnover','tropicFractionI0')#
+defaults = c(1.0,1.0,1.0,1.0,0.0)#
+parDefaults = data.frame('relativeN'=1.0,'tropicFractionI0'=1.0,'relativeR0'=1.0,'relativeTurnover'=1.0,'seasonalAmplitude'=0.0)#
+#
+#################################
+#FIGURE S2#
+################################
+#
+resultsDb = paste(resultsDir,'results.sqlite',sep='/')#
+#
+parNames = c('relativeR0','relativeN','tropicFractionI0','relativeTurnover','seasonalAmplitude')#
+headerNames = c('Relative R0','Relative population size','Fraction of initial infecteds in tropics','Relative turnover','Seasonal amplitude')#
+headers = data.frame(parNames,headerNames)#
+comboDb = dbConnect(SQLite(), dbname = resultsDb)#
+initExtension(comboDb)#
+antigenDF = dbGetQuery(comboDb, paste('SELECT',paste(parNames,collapse=','),', tropicsTrunkPro, tropicsTrunkProSD, tropicsAgLag, tropicsAgLagSD, extinctions, excessDiversities, fluLike FROM AgLagTrunkPro',sep=' '))#
+#
+agAnova = aov(tropicsAgLag~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+trunkAnova = aov(tropicsTrunkPro~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+#
+plotDF = dbGetQuery(comboDb, paste('SELECT',paste(parNames,collapse=','),', tropicsTrunkPro, tropicsAgLag FROM pooled_results',sep=' '))#
+tTPsens = pcc(plotDF[,1:5], plotDF$tropicsTrunkPro,nboot=100)#
+tALsens = pcc(plotDF[,1:5], plotDF$tropicsAgLag,nboot=100)#
+#
+fit = lm(tropicsAgLag~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+plots=c()#
+#
+i = 1#
+for(parName in parNames){#
+	print(parName)#
+	sens = tTPsens$PCC[i,]$'original' #
+	minCI = tTPsens$PCC[i,]$'min. c.i.'#
+	maxCI = tTPsens$PCC[i,]$'max. c.i.'#
+#
+	trunkProPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsTrunkPro")) + #
+		geom_point(size = pointSize) + #
+		xlab(NULL) +#
+		ylab(NULL) +#
+		ylim(c(0,1)) + #
+		theme_classic() + #
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes +#
+		theme(axis.text.x=element_blank()) #
+	if(parName == parNames[1]){#
+		trunkProPlot = trunkProPlot + ylab("Tropics Trunk Proportion")#
+		trunkProPlotRow = ggplotGrob(trunkProPlot)#
+	}#
+	else{#
+		trunkProPlot = trunkProPlot + theme(axis.text.y=element_blank()) #
+		trunkProPlotRow = cbind(trunkProPlotRow,ggplotGrob(trunkProPlot),size='first')#
+	}#
+}	#
+#
+i=1#
+for(parName in parNames){#
+	sens = round(tALsens$PCC[i,]$'original' ,2)#
+	minCI = round(tALsens$PCC[i,]$'min. c.i.',2)#
+	maxCI = round(tALsens$PCC[i,]$'max. c.i.',2)#
+#
+	print(parName)		#
+	agLagPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsAgLag")) + #
+		geom_point(size = pointSize) + #
+		xlab(headers$headerNames[headers$parNames==parName]) + #
+		ylab(NULL) + #
+		ylim(c(-0.4,0.4)) + #
+		theme_classic() +#
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes#
+	if(parName == parNames[1]){#
+		agLagPlot = agLagPlot + ylab("Tropics Antigenic Lead")#
+		agLagPlotRow = ggplotGrob(agLagPlot)#
+	}#
+	else{#
+		agLagPlot = agLagPlot + theme(axis.text.y=element_blank()) #
+		agLagPlotRow = cbind(agLagPlotRow, ggplotGrob(agLagPlot), size='first')#
+	}#
+}#
+#
+figureS2 = rbind(trunkProPlotRow,agLagPlotRow,size='first')#
+pdf('./Figure_S2.pdf',7,3.5)#
+grid.draw(figureS2)#
+dev.off()#
+dbDisconnect(comboDb)#
+#
+print(xtable(summary(agAnova)))#
+print(xtable(summary(trunkAnova)))
+#!/usr/bin/env Rscript#
+library(RSQLite)#
+library(ggplot2)#
+library(reshape2)#
+library(gridExtra)#
+library(grid)#
+library(sensitivity)#
+library(scales)#
+library(xtable)#
+library(gtable)#
+#
+#######################
+figureWidth = 7 #inches#
+textSize = 6#
+pointSize = 0.01#
+lineSize = .8#
+plot_themes  = 	theme_classic() +#
+				theme(axis.line = element_line(size=.3)) +#
+				theme(axis.ticks = element_line(size=.3)) +#
+				theme(axis.ticks.length = unit(-.07,'cm')) +#
+				theme(axis.ticks.margin = unit(.11,'cm')) +#
+				theme(axis.title.x=element_text(size=textSize)) + #
+				theme(axis.text.x=element_text(size= textSize)) + #
+				theme(axis.title.y=element_text(size= textSize)) +#
+				theme(axis.text.y=element_text(size= textSize)) +#
+				theme(plot.title=element_text(size=textSize)) +#
+				theme(plot.margin=unit(c(3,3,3,3),'mm')) +#
+				theme(legend.title=element_text(size=textSize)) +#
+				theme(legend.text=element_text(size=textSize)) +#
+				theme(legend.position ='bottom') +#
+				theme(legend.direction='horizontal') +#
+				theme(legend.margin = unit(-.5,'cm')) +#
+				theme(panel.border = element_rect(colour = "black", fill=NA, size=.5)) +#
+				theme(axis.line = element_blank())#
+#
+resultsDir = '.'#
+resultsDb = 'results.sqlite'#
+#
+parNames = c('relativeR0','seasonalAmplitude','relativeN','relativeTurnover','tropicFractionI0')#
+defaults = c(1.0,1.0,1.0,1.0,0.0)#
+parDefaults = data.frame('relativeN'=1.0,'tropicFractionI0'=1.0,'relativeR0'=1.0,'relativeTurnover'=1.0,'seasonalAmplitude'=0.0)#
+#
+#################################
+#FIGURE S2#
+################################
+#
+resultsDb = paste(resultsDir,'results.sqlite',sep='/')#
+#
+parNames = c('relativeR0','relativeN','tropicFractionI0','relativeTurnover','seasonalAmplitude')#
+headerNames = c('Relative R0','Relative population size','Fraction of initial infecteds in tropics','Relative turnover','Seasonal amplitude')#
+headers = data.frame(parNames,headerNames)#
+comboDb = dbConnect(SQLite(), dbname = resultsDb)#
+initExtension(comboDb)#
+antigenDF = dbGetQuery(comboDb, paste('SELECT',paste(parNames,collapse=','),', tropicsTrunkPro, tropicsTrunkProSD, tropicsAgLag, tropicsAgLagSD, extinctions, excessDiversities, fluLike FROM AgLagTrunkPro',sep=' '))#
+#
+agAnova = aov(tropicsAgLag~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+trunkAnova = aov(tropicsTrunkPro~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+#
+plotDF = dbGetQuery(comboDb, paste('SELECT',paste(parNames,collapse=','),', tropicsTrunkPro, tropicsAgLag FROM pooled_results',sep=' '))#
+tTPsens = pcc(plotDF[,1:5], plotDF$tropicsTrunkPro,nboot=100)#
+tALsens = pcc(plotDF[,1:5], plotDF$tropicsAgLag,nboot=100)#
+#
+fit = lm(tropicsAgLag~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+plots=c()#
+#
+i = 1#
+for(parName in parNames){#
+	print(parName)#
+	sens = tTPsens$PCC[i,]$'original' #
+	minCI = tTPsens$PCC[i,]$'min. c.i.'#
+	maxCI = tTPsens$PCC[i,]$'max. c.i.'#
+#
+	trunkProPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsTrunkPro")) + #
+		geom_point(size = pointSize) + #
+		xlab(NULL) +#
+		ylab(NULL) +#
+		ylim(c(0,1)) + #
+		theme_classic() + #
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes +#
+		theme(axis.text.x=element_blank()) #
+	if(parName == parNames[1]){#
+		trunkProPlot = trunkProPlot + ylab("Tropics Trunk Proportion")#
+		trunkProPlotRow = ggplotGrob(trunkProPlot)#
+	}#
+	else{#
+		trunkProPlot = trunkProPlot + theme(axis.text.y=element_blank()) #
+		trunkProPlotRow = cbind(trunkProPlotRow,ggplotGrob(trunkProPlot),size='first')#
+	}#
+}	#
+#
+i=1#
+for(parName in parNames){#
+	sens = round(tALsens$PCC[i,]$'original' ,2)#
+	minCI = round(tALsens$PCC[i,]$'min. c.i.',2)#
+	maxCI = round(tALsens$PCC[i,]$'max. c.i.',2)#
+#
+	print(parName)		#
+	agLagPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsAgLag")) + #
+		geom_point(size = pointSize) + #
+		xlab(headers$headerNames[headers$parNames==parName]) + #
+		ylab(NULL) + #
+		ylim(c(-0.4,0.4)) + #
+		theme_classic() +#
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes#
+	if(parName == parNames[1]){#
+		agLagPlot = agLagPlot + ylab("Tropics Antigenic Lead")#
+		agLagPlotRow = ggplotGrob(agLagPlot)#
+	}#
+	else{#
+		agLagPlot = agLagPlot + theme(axis.text.y=element_blank()) #
+		agLagPlotRow = cbind(agLagPlotRow, ggplotGrob(agLagPlot), size='first')#
+	}#
+}#
+#
+figureS2 = rbind(trunkProPlotRow,agLagPlotRow,size='first')#
+pdf('./Figure_S2.pdf',figureWidth,figureWidth/2)#
+grid.draw(figureS2)#
+dev.off()#
+dbDisconnect(comboDb)#
+#
+print(xtable(summary(agAnova)))#
+print(xtable(summary(trunkAnova)))
+#!/usr/bin/env Rscript#
+library(RSQLite)#
+library(ggplot2)#
+library(reshape2)#
+library(gridExtra)#
+library(grid)#
+library(sensitivity)#
+library(scales)#
+library(xtable)#
+library(gtable)#
+#
+#######################
+figureWidth = 7 #inches#
+textSize = 6#
+pointSize = 0.1#
+lineSize = .8#
+plot_themes  = 	theme_classic() +#
+				theme(axis.line = element_line(size=.3)) +#
+				theme(axis.ticks = element_line(size=.3)) +#
+				theme(axis.ticks.length = unit(-.07,'cm')) +#
+				theme(axis.ticks.margin = unit(.11,'cm')) +#
+				theme(axis.title.x=element_text(size=textSize)) + #
+				theme(axis.text.x=element_text(size= textSize)) + #
+				theme(axis.title.y=element_text(size= textSize)) +#
+				theme(axis.text.y=element_text(size= textSize)) +#
+				theme(plot.title=element_text(size=textSize)) +#
+				theme(plot.margin=unit(c(3,3,3,3),'mm')) +#
+				theme(legend.title=element_text(size=textSize)) +#
+				theme(legend.text=element_text(size=textSize)) +#
+				theme(legend.position ='bottom') +#
+				theme(legend.direction='horizontal') +#
+				theme(legend.margin = unit(-.5,'cm')) +#
+				theme(panel.border = element_rect(colour = "black", fill=NA, size=.5)) +#
+				theme(axis.line = element_blank())#
+#
+resultsDir = '.'#
+resultsDb = 'results.sqlite'#
+#
+parNames = c('relativeR0','seasonalAmplitude','relativeN','relativeTurnover','tropicFractionI0')#
+defaults = c(1.0,1.0,1.0,1.0,0.0)#
+parDefaults = data.frame('relativeN'=1.0,'tropicFractionI0'=1.0,'relativeR0'=1.0,'relativeTurnover'=1.0,'seasonalAmplitude'=0.0)#
+#
+#################################
+#FIGURE S2#
+################################
+#
+resultsDb = paste(resultsDir,'results.sqlite',sep='/')#
+#
+parNames = c('relativeR0','relativeN','tropicFractionI0','relativeTurnover','seasonalAmplitude')#
+headerNames = c('Relative R0','Relative population size','Fraction of initial infecteds in tropics','Relative turnover','Seasonal amplitude')#
+headers = data.frame(parNames,headerNames)#
+comboDb = dbConnect(SQLite(), dbname = resultsDb)#
+initExtension(comboDb)#
+antigenDF = dbGetQuery(comboDb, paste('SELECT',paste(parNames,collapse=','),', tropicsTrunkPro, tropicsTrunkProSD, tropicsAgLag, tropicsAgLagSD, extinctions, excessDiversities, fluLike FROM AgLagTrunkPro',sep=' '))#
+#
+agAnova = aov(tropicsAgLag~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+trunkAnova = aov(tropicsTrunkPro~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+#
+plotDF = dbGetQuery(comboDb, paste('SELECT',paste(parNames,collapse=','),', tropicsTrunkPro, tropicsAgLag FROM pooled_results',sep=' '))#
+tTPsens = pcc(plotDF[,1:5], plotDF$tropicsTrunkPro,nboot=100)#
+tALsens = pcc(plotDF[,1:5], plotDF$tropicsAgLag,nboot=100)#
+#
+fit = lm(tropicsAgLag~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+plots=c()#
+#
+i = 1#
+for(parName in parNames){#
+	print(parName)#
+	sens = tTPsens$PCC[i,]$'original' #
+	minCI = tTPsens$PCC[i,]$'min. c.i.'#
+	maxCI = tTPsens$PCC[i,]$'max. c.i.'#
+#
+	trunkProPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsTrunkPro")) + #
+		geom_point(size = pointSize) + #
+		xlab(NULL) +#
+		ylab(NULL) +#
+		ylim(c(0,1)) + #
+		theme_classic() + #
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes +#
+		theme(axis.text.x=element_blank()) #
+	if(parName == parNames[1]){#
+		trunkProPlot = trunkProPlot + ylab("Tropics Trunk Proportion")#
+		trunkProPlotRow = ggplotGrob(trunkProPlot)#
+	}#
+	else{#
+		trunkProPlot = trunkProPlot + theme(axis.text.y=element_blank()) #
+		trunkProPlotRow = cbind(trunkProPlotRow,ggplotGrob(trunkProPlot),size='first')#
+	}#
+}	#
+#
+i=1#
+for(parName in parNames){#
+	sens = round(tALsens$PCC[i,]$'original' ,2)#
+	minCI = round(tALsens$PCC[i,]$'min. c.i.',2)#
+	maxCI = round(tALsens$PCC[i,]$'max. c.i.',2)#
+#
+	print(parName)		#
+	agLagPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsAgLag")) + #
+		geom_point(size = pointSize) + #
+		xlab(headers$headerNames[headers$parNames==parName]) + #
+		ylab(NULL) + #
+		ylim(c(-0.4,0.4)) + #
+		theme_classic() +#
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes#
+	if(parName == parNames[1]){#
+		agLagPlot = agLagPlot + ylab("Tropics Antigenic Lead")#
+		agLagPlotRow = ggplotGrob(agLagPlot)#
+	}#
+	else{#
+		agLagPlot = agLagPlot + theme(axis.text.y=element_blank()) #
+		agLagPlotRow = cbind(agLagPlotRow, ggplotGrob(agLagPlot), size='first')#
+	}#
+}#
+#
+figureS2 = rbind(trunkProPlotRow,agLagPlotRow,size='first')#
+pdf('./Figure_S2.pdf',figureWidth,figureWidth/2)#
+grid.draw(figureS2)#
+dev.off()#
+dbDisconnect(comboDb)#
+#
+print(xtable(summary(agAnova)))#
+print(xtable(summary(trunkAnova)))
+library(ggplot2)#
+library(RSQLite)#
+library(reshape2)#
+library(gridExtra)#
+library(grid)#
+library(scales)#
+#
+figure_width = 3.425 #(inches)#
+#
+resultsDir = '../'#
+plotDir = '../figures'#
+#
+textSize = 6#
+pointSize = .1#
+lineSize = .3#
+plot_themes  = 	theme_classic() +#
+				theme(axis.line = element_line(size=.3)) +#
+				theme(axis.ticks = element_line(size=.3)) +#
+				theme(axis.ticks.length = unit(-.07,'cm')) +#
+				theme(axis.ticks.margin = unit(.11,'cm')) +#
+				theme(axis.title.x=element_text(size=textSize)) + #
+				theme(axis.text.x=element_text(size= textSize)) + #
+				theme(axis.title.y=element_text(size= textSize)) +#
+				theme(axis.text.y=element_text(size= textSize)) +#
+				theme(plot.title=element_text(size=textSize+2)) +#
+				theme(plot.margin=unit(c(1,1,1,1),'mm')) +#
+				theme(legend.title=element_text(size=textSize)) +#
+				theme(legend.text=element_text(size=textSize)) +#
+				theme(legend.position ='bottom') +#
+				theme(legend.direction='horizontal') +#
+				theme(legend.margin = unit(-.5,'cm')) +#
+				theme(panel.border = element_rect(colour = "black", fill=NA, size=.5)) +#
+				theme(axis.line = element_blank())#
+#
+#################################################################################################
+#
+resultsDb = paste(resultsDir,'results.sqlite',sep='/')#
+comboDb = dbConnect(SQLite(), dbname = resultsDb)#
+initExtension(comboDb)#
+#
+parName = 'relativeR0'#
+PARNAMES = c('relativeN','tropicFractionI0','relativeR0','relativeTurnover','seasonalAmplitude')#
+antigenDF = dbGetQuery(comboDb, paste('SELECT',paste(PARNAMES,collapse=','),', sweepID,tropicsTrunkPro, tropicsAgLag FROM pooled_results',sep=' '))#
+plotDF = antigenDF[which(antigenDF$sweepID==parName),]#
+#
+agLead.corr = cor.test(plotDF[,parName],plotDF$tropicsAgLag)$p.value#
+agLead.fit = lm(tropicsAgLag~plotDF[,parName], data=plotDF)#
+#
+agLeadPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsAgLag")) + #
+	geom_point(size = pointSize) + #
+	xlab(expression(paste("Relative ",italic("R"[0]),sep=" "))) + #
+	ylab("Tropics antigenic lead") + #
+	ylim(c(-0.4,0.4)) +#
+	stat_smooth(method="lm",se=FALSE,size=lineSize) +#
+	geom_hline(aes(yintercept=0.0),linetype=2, size = lineSize) + #
+	plot_themes + ggtitle('B') + theme(plot.title=element_text(hjust=-.2))#
+#
+trunkrPro.corr = cor.test(plotDF[, parName],plotDF$tropicsTrunkPro)#
+trunkPro.fit = lm(tropicsTrunkPro~plotDF[,parName], data=plotDF)#
+#
+trunkProPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsTrunkPro")) + #
+	geom_point(size = pointSize) + #
+	xlab(expression(paste("Relative ",italic("R"[0]),sep=" "))) + #
+	ylab("Tropics trunk proportion") + #
+	ylim(c(0,1)) + #
+	stat_smooth(method="lm",se=FALSE,size=lineSize) +#
+	geom_hline(aes(yintercept=1/3),linetype=2, size = lineSize) +#
+	plot_themes +#
+	ggtitle("A") + theme(plot.title=element_text(hjust=-.2))#
+#
+dbDisconnect(comboDb)#
+#
+plots = list(trunkProPlot,agLeadPlot)#
+args_list = c(plots,1,2)#
+names(args_list)=c(letters[1:length(plots)],'nrow','ncol')#
+#
+pdf(paste(plotDir,'/Figure_2.pdf',sep=''), width = figure_width, height = figure_width * 0.55)#
+do.call(grid.arrange,args_list)#
+dev.off()
+#!/usr/bin/env Rscript#
+library(RSQLite)#
+library(ggplot2)#
+library(reshape2)#
+library(gridExtra)#
+library(grid)#
+library(sensitivity)#
+library(scales)#
+library(xtable)#
+library(gtable)#
+#
+#######################
+figureWidth = 7 #inches#
+textSize = 6#
+pointSize = 0.5#
+lineSize = .8#
+plot_themes  = 	theme_classic() +#
+				theme(axis.line = element_line(size=.3)) +#
+				theme(axis.ticks = element_line(size=.3)) +#
+				theme(axis.ticks.length = unit(-.07,'cm')) +#
+				theme(axis.ticks.margin = unit(.11,'cm')) +#
+				theme(axis.title.x=element_text(size=textSize)) + #
+				theme(axis.text.x=element_text(size= textSize)) + #
+				theme(axis.title.y=element_text(size= textSize)) +#
+				theme(axis.text.y=element_text(size= textSize)) +#
+				theme(plot.title=element_text(size=textSize)) +#
+				theme(plot.margin=unit(c(3,3,3,3),'mm')) +#
+				theme(legend.title=element_text(size=textSize)) +#
+				theme(legend.text=element_text(size=textSize)) +#
+				theme(legend.position ='bottom') +#
+				theme(legend.direction='horizontal') +#
+				theme(legend.margin = unit(-.5,'cm')) +#
+				theme(panel.border = element_rect(colour = "black", fill=NA, size=.5)) +#
+				theme(axis.line = element_blank())#
+#
+resultsDir = '.'#
+resultsDb = 'results.sqlite'#
+#
+parNames = c('relativeR0','seasonalAmplitude','relativeN','relativeTurnover','tropicFractionI0')#
+defaults = c(1.0,1.0,1.0,1.0,0.0)#
+parDefaults = data.frame('relativeN'=1.0,'tropicFractionI0'=1.0,'relativeR0'=1.0,'relativeTurnover'=1.0,'seasonalAmplitude'=0.0)#
+#
+#################################
+#FIGURE S2#
+################################
+#
+resultsDb = paste(resultsDir,'results.sqlite',sep='/')#
+#
+parNames = c('relativeR0','relativeN','tropicFractionI0','relativeTurnover','seasonalAmplitude')#
+headerNames = c('Relative R0','Relative population size','Fraction of initial infecteds in tropics','Relative turnover','Seasonal amplitude')#
+headers = data.frame(parNames,headerNames)#
+comboDb = dbConnect(SQLite(), dbname = resultsDb)#
+initExtension(comboDb)#
+antigenDF = dbGetQuery(comboDb, paste('SELECT',paste(parNames,collapse=','),', tropicsTrunkPro, tropicsTrunkProSD, tropicsAgLag, tropicsAgLagSD, extinctions, excessDiversities, fluLike FROM AgLagTrunkPro',sep=' '))#
+#
+agAnova = aov(tropicsAgLag~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+trunkAnova = aov(tropicsTrunkPro~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+#
+plotDF = dbGetQuery(comboDb, paste('SELECT',paste(parNames,collapse=','),', tropicsTrunkPro, tropicsAgLag FROM pooled_results',sep=' '))#
+tTPsens = pcc(plotDF[,1:5], plotDF$tropicsTrunkPro,nboot=100)#
+tALsens = pcc(plotDF[,1:5], plotDF$tropicsAgLag,nboot=100)#
+#
+fit = lm(tropicsAgLag~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+plots=c()#
+#
+i = 1#
+for(parName in parNames){#
+	print(parName)#
+	sens = tTPsens$PCC[i,]$'original' #
+	minCI = tTPsens$PCC[i,]$'min. c.i.'#
+	maxCI = tTPsens$PCC[i,]$'max. c.i.'#
+#
+	trunkProPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsTrunkPro")) + #
+		geom_point(size = pointSize) + #
+		xlab(NULL) +#
+		ylab(NULL) +#
+		ylim(c(0,1)) + #
+		theme_classic() + #
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes +#
+		theme(axis.text.x=element_blank()) #
+	if(parName == parNames[1]){#
+		trunkProPlot = trunkProPlot + ylab("Tropics Trunk Proportion")#
+		trunkProPlotRow = ggplotGrob(trunkProPlot)#
+	}#
+	else{#
+		trunkProPlot = trunkProPlot + theme(axis.text.y=element_blank()) #
+		trunkProPlotRow = cbind(trunkProPlotRow,ggplotGrob(trunkProPlot),size='first')#
+	}#
+}	#
+#
+i=1#
+for(parName in parNames){#
+	sens = round(tALsens$PCC[i,]$'original' ,2)#
+	minCI = round(tALsens$PCC[i,]$'min. c.i.',2)#
+	maxCI = round(tALsens$PCC[i,]$'max. c.i.',2)#
+#
+	print(parName)		#
+	agLagPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsAgLag")) + #
+		geom_point(size = pointSize) + #
+		xlab(headers$headerNames[headers$parNames==parName]) + #
+		ylab(NULL) + #
+		ylim(c(-0.4,0.4)) + #
+		theme_classic() +#
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes#
+	if(parName == parNames[1]){#
+		agLagPlot = agLagPlot + ylab("Tropics Antigenic Lead")#
+		agLagPlotRow = ggplotGrob(agLagPlot)#
+	}#
+	else{#
+		agLagPlot = agLagPlot + theme(axis.text.y=element_blank()) #
+		agLagPlotRow = cbind(agLagPlotRow, ggplotGrob(agLagPlot), size='first')#
+	}#
+}#
+#
+figureS2 = rbind(trunkProPlotRow,agLagPlotRow,size='first')#
+pdf('./Figure_S2.pdf',figureWidth,figureWidth/2)#
+grid.draw(figureS2)#
+dev.off()#
+dbDisconnect(comboDb)#
+#
+print(xtable(summary(agAnova)))#
+print(xtable(summary(trunkAnova)))
+#!/usr/bin/env Rscript#
+library(RSQLite)#
+library(ggplot2)#
+library(reshape2)#
+library(gridExtra)#
+library(grid)#
+library(sensitivity)#
+library(scales)#
+library(xtable)#
+library(gtable)#
+#
+#######################
+figureWidth = 7 #inches#
+textSize = 6#
+pointSize = 0.1#
+lineSize = .8#
+plot_themes  = 	theme_classic() +#
+				theme(axis.line = element_line(size=.3)) +#
+				theme(axis.ticks = element_line(size=.3)) +#
+				theme(axis.ticks.length = unit(-.07,'cm')) +#
+				theme(axis.ticks.margin = unit(.11,'cm')) +#
+				theme(axis.title.x=element_text(size=textSize)) + #
+				theme(axis.text.x=element_text(size= textSize)) + #
+				theme(axis.title.y=element_text(size= textSize)) +#
+				theme(axis.text.y=element_text(size= textSize)) +#
+				theme(plot.title=element_text(size=textSize)) +#
+				theme(plot.margin=unit(c(3,3,3,3),'mm')) +#
+				theme(legend.title=element_text(size=textSize)) +#
+				theme(legend.text=element_text(size=textSize)) +#
+				theme(legend.position ='bottom') +#
+				theme(legend.direction='horizontal') +#
+				theme(legend.margin = unit(-.5,'cm')) +#
+				theme(panel.border = element_rect(colour = "black", fill=NA, size=.5)) +#
+				theme(axis.line = element_blank())#
+#
+resultsDir = '.'#
+resultsDb = 'results.sqlite'#
+#
+parNames = c('relativeR0','seasonalAmplitude','relativeN','relativeTurnover','tropicFractionI0')#
+defaults = c(1.0,1.0,1.0,1.0,0.0)#
+parDefaults = data.frame('relativeN'=1.0,'tropicFractionI0'=1.0,'relativeR0'=1.0,'relativeTurnover'=1.0,'seasonalAmplitude'=0.0)#
+#
+#################################
+#FIGURE S2#
+################################
+#
+resultsDb = paste(resultsDir,'results.sqlite',sep='/')#
+#
+parNames = c('relativeR0','relativeN','tropicFractionI0','relativeTurnover','seasonalAmplitude')#
+headerNames = c('Relative R0','Relative population size','Fraction of initial infecteds in tropics','Relative turnover','Seasonal amplitude')#
+headers = data.frame(parNames,headerNames)#
+comboDb = dbConnect(SQLite(), dbname = resultsDb)#
+initExtension(comboDb)#
+antigenDF = dbGetQuery(comboDb, paste('SELECT',paste(parNames,collapse=','),', tropicsTrunkPro, tropicsTrunkProSD, tropicsAgLag, tropicsAgLagSD, extinctions, excessDiversities, fluLike FROM AgLagTrunkPro',sep=' '))#
+#
+agAnova = aov(tropicsAgLag~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+trunkAnova = aov(tropicsTrunkPro~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+#
+plotDF = dbGetQuery(comboDb, paste('SELECT',paste(parNames,collapse=','),', tropicsTrunkPro, tropicsAgLag FROM pooled_results',sep=' '))#
+tTPsens = pcc(plotDF[,1:5], plotDF$tropicsTrunkPro,nboot=100)#
+tALsens = pcc(plotDF[,1:5], plotDF$tropicsAgLag,nboot=100)#
+#
+fit = lm(tropicsAgLag~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+plots=c()#
+#
+i = 1#
+for(parName in parNames){#
+	print(parName)#
+	sens = tTPsens$PCC[i,]$'original' #
+	minCI = tTPsens$PCC[i,]$'min. c.i.'#
+	maxCI = tTPsens$PCC[i,]$'max. c.i.'#
+#
+	trunkProPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsTrunkPro")) + #
+		geom_point(size = pointSize) + #
+		xlab(NULL) +#
+		ylab(NULL) +#
+		ylim(c(0,1)) + #
+		theme_classic() + #
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes +#
+		theme(axis.text.x=element_blank()) #
+	if(parName == parNames[1]){#
+		trunkProPlot = trunkProPlot + ylab("Tropics Trunk Proportion")#
+		trunkProPlotRow = ggplotGrob(trunkProPlot)#
+	}#
+	else{#
+		trunkProPlot = trunkProPlot + theme(axis.text.y=element_blank()) #
+		trunkProPlotRow = cbind(trunkProPlotRow,ggplotGrob(trunkProPlot),size='first')#
+	}#
+}	#
+#
+i=1#
+for(parName in parNames){#
+	sens = round(tALsens$PCC[i,]$'original' ,2)#
+	minCI = round(tALsens$PCC[i,]$'min. c.i.',2)#
+	maxCI = round(tALsens$PCC[i,]$'max. c.i.',2)#
+#
+	print(parName)		#
+	agLagPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsAgLag")) + #
+		geom_point(size = pointSize) + #
+		xlab(headers$headerNames[headers$parNames==parName]) + #
+		ylab(NULL) + #
+		ylim(c(-0.4,0.4)) + #
+		theme_classic() +#
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes#
+	if(parName == parNames[1]){#
+		agLagPlot = agLagPlot + ylab("Tropics Antigenic Lead")#
+		agLagPlotRow = ggplotGrob(agLagPlot)#
+	}#
+	else{#
+		agLagPlot = agLagPlot + theme(axis.text.y=element_blank()) #
+		agLagPlotRow = cbind(agLagPlotRow, ggplotGrob(agLagPlot), size='first')#
+	}#
+}#
+#
+figureS2 = rbind(trunkProPlotRow,agLagPlotRow,size='first')#
+pdf('./Figure_S2.pdf',figureWidth,figureWidth/2)#
+grid.draw(figureS2)#
+dev.off()#
+dbDisconnect(comboDb)#
+#
+print(xtable(summary(agAnova)))#
+print(xtable(summary(trunkAnova)))
+#!/usr/bin/env Rscript#
+library(RSQLite)#
+library(ggplot2)#
+library(reshape2)#
+library(gridExtra)#
+library(grid)#
+library(sensitivity)#
+library(scales)#
+library(xtable)#
+library(gtable)#
+#
+#######################
+figureWidth = 7 #inches#
+textSize = 6#
+pointSize = 0.1#
+lineSize = .8#
+plot_themes  = 	theme_classic() +#
+				theme(axis.line = element_line(size=.3)) +#
+				theme(axis.ticks = element_line(size=.3)) +#
+				theme(axis.ticks.length = unit(-.07,'cm')) +#
+				theme(axis.ticks.margin = unit(.11,'cm')) +#
+				theme(axis.title.x=element_text(size=textSize)) + #
+				theme(axis.text.x=element_text(size= textSize)) + #
+				theme(axis.title.y=element_text(size= textSize)) +#
+				theme(axis.text.y=element_text(size= textSize)) +#
+				theme(plot.title=element_text(size=textSize)) +#
+				theme(plot.margin=unit(c(3,3,3,3),'mm')) +#
+				theme(legend.title=element_text(size=textSize)) +#
+				theme(legend.text=element_text(size=textSize)) +#
+				theme(legend.position ='bottom') +#
+				theme(legend.direction='horizontal') +#
+				theme(legend.margin = unit(-.5,'cm')) +#
+				theme(panel.border = element_rect(colour = "black", fill=NA, size=.5)) +#
+				theme(axis.line = element_blank())#
+#
+resultsDir = '.'#
+resultsDb = 'results.sqlite'#
+#
+parNames = c('relativeR0','seasonalAmplitude','relativeN','relativeTurnover','tropicFractionI0')#
+defaults = c(1.0,1.0,1.0,1.0,0.0)#
+parDefaults = data.frame('relativeN'=1.0,'tropicFractionI0'=1.0,'relativeR0'=1.0,'relativeTurnover'=1.0,'seasonalAmplitude'=0.0)#
+#
+#################################
+#FIGURE S2#
+################################
+#
+resultsDb = paste(resultsDir,'results.sqlite',sep='/')#
+#
+parNames = c('relativeR0','relativeN','tropicFractionI0','relativeTurnover','seasonalAmplitude')#
+headerNames = c('Relative R0','Relative population size','Fraction of initial infecteds in tropics','Relative turnover','Seasonal amplitude')#
+headers = data.frame(parNames,headerNames)#
+comboDb = dbConnect(SQLite(), dbname = resultsDb)#
+initExtension(comboDb)#
+antigenDF = dbGetQuery(comboDb, paste('SELECT',paste(parNames,collapse=','),', tropicsTrunkPro, tropicsAgLag FROM pooled_results',sep=' '))#
+#
+agAnova = aov(tropicsAgLag~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+trunkAnova = aov(tropicsTrunkPro~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+#
+plotDF = dbGetQuery(comboDb, paste('SELECT',paste(parNames,collapse=','),', tropicsTrunkPro, tropicsAgLag FROM pooled_results',sep=' '))#
+tTPsens = pcc(plotDF[,1:5], plotDF$tropicsTrunkPro,nboot=100)#
+tALsens = pcc(plotDF[,1:5], plotDF$tropicsAgLag,nboot=100)#
+#
+fit = lm(tropicsAgLag~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=antigenDF)#
+plots=c()#
+#
+i = 1#
+for(parName in parNames){#
+	print(parName)#
+	sens = tTPsens$PCC[i,]$'original' #
+	minCI = tTPsens$PCC[i,]$'min. c.i.'#
+	maxCI = tTPsens$PCC[i,]$'max. c.i.'#
+#
+	trunkProPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsTrunkPro")) + #
+		geom_point(size = pointSize) + #
+		xlab(NULL) +#
+		ylab(NULL) +#
+		ylim(c(0,1)) + #
+		theme_classic() + #
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes +#
+		theme(axis.text.x=element_blank()) #
+	if(parName == parNames[1]){#
+		trunkProPlot = trunkProPlot + ylab("Tropics Trunk Proportion")#
+		trunkProPlotRow = ggplotGrob(trunkProPlot)#
+	}#
+	else{#
+		trunkProPlot = trunkProPlot + theme(axis.text.y=element_blank()) #
+		trunkProPlotRow = cbind(trunkProPlotRow,ggplotGrob(trunkProPlot),size='first')#
+	}#
+}	#
+#
+i=1#
+for(parName in parNames){#
+	sens = round(tALsens$PCC[i,]$'original' ,2)#
+	minCI = round(tALsens$PCC[i,]$'min. c.i.',2)#
+	maxCI = round(tALsens$PCC[i,]$'max. c.i.',2)#
+#
+	print(parName)		#
+	agLagPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsAgLag")) + #
+		geom_point(size = pointSize) + #
+		xlab(headers$headerNames[headers$parNames==parName]) + #
+		ylab(NULL) + #
+		ylim(c(-0.4,0.4)) + #
+		theme_classic() +#
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes#
+	if(parName == parNames[1]){#
+		agLagPlot = agLagPlot + ylab("Tropics Antigenic Lead")#
+		agLagPlotRow = ggplotGrob(agLagPlot)#
+	}#
+	else{#
+		agLagPlot = agLagPlot + theme(axis.text.y=element_blank()) #
+		agLagPlotRow = cbind(agLagPlotRow, ggplotGrob(agLagPlot), size='first')#
+	}#
+}#
+#
+figureS2 = rbind(trunkProPlotRow,agLagPlotRow,size='first')#
+pdf('./Figure_S2.pdf',figureWidth,figureWidth/2)#
+grid.draw(figureS2)#
+dev.off()#
+dbDisconnect(comboDb)#
+#
+print(xtable(summary(agAnova)))#
+print(xtable(summary(trunkAnova)))
+#!/usr/bin/env Rscript#
+library(RSQLite)#
+library(ggplot2)#
+library(reshape2)#
+library(gridExtra)#
+library(grid)#
+library(sensitivity)#
+library(scales)#
+library(xtable)#
+library(gtable)#
+#
+resultsDir = '../../analysis/univariate_analyses'#
+plotDir = './'#
+#
+figureWidth = 7 #
+textSize = 6#
+pointSize = 0.05#
+lineSize = .8#
+plot_themes  = 	theme_classic() +#
+				theme(axis.line = element_line(size=.3)) +#
+				theme(axis.ticks = element_line(size=.3)) +#
+				theme(axis.ticks.length = unit(-.07,'cm')) +#
+				theme(axis.ticks.margin = unit(.11,'cm')) +#
+				theme(axis.title.x=element_text(size=textSize)) + #
+				theme(axis.text.x=element_text(size= textSize)) + #
+				theme(axis.title.y=element_text(size= textSize)) +#
+				theme(axis.text.y=element_text(size= textSize)) +#
+				theme(plot.title=element_text(size=textSize)) +#
+				theme(plot.margin=unit(c(3,3,3,3),'mm')) +#
+				theme(legend.title=element_text(size=textSize)) +#
+				theme(legend.text=element_text(size=textSize)) +#
+				theme(legend.position ='bottom') +#
+				theme(legend.direction='horizontal') +#
+				theme(legend.margin = unit(-.5,'cm')) +#
+				theme(panel.border = element_rect(colour = "black", fill=NA, size=.5)) +#
+				theme(axis.line = element_blank())#
+#
+resultsDir = '../'#
+resultsDb = paste(resultsDir,'results.sqlite',sep='')#
+#
+parNames = c('relativeR0','seasonalAmplitude','relativeN','relativeTurnover','tropicFractionI0')#
+defaults = c(1.0,1.0,1.0,1.0,0.0)#
+parDefaults = data.frame('relativeN'=1.0,'tropicFractionI0'=1.0,'relativeR0'=1.0,'relativeTurnover'=1.0,'seasonalAmplitude'=0.0)#
+#
+#################################
+#FIGURE S2#
+################################
+#
+resultsDb = paste(resultsDir,'results.sqlite',sep='/')#
+#
+parNames = c('relativeR0','relativeN','tropicFractionI0','relativeTurnover','seasonalAmplitude')#
+headerNames = c('Relative R0','Relative population size','Fraction of initial infecteds in tropics','Relative turnover','Seasonal amplitude')#
+headers = data.frame(parNames,headerNames)#
+comboDb = dbConnect(SQLite(), dbname = resultsDb)#
+initExtension(comboDb)#
+#
+plotDF = dbGetQuery(comboDb, paste('SELECT',paste(parNames,collapse=','),', tropicsTrunkPro, tropicsAgLag FROM pooled_results',sep=' '))#
+tTPsens = pcc(plotDF[,1:5], plotDF$tropicsTrunkPro,nboot=100)#
+tALsens = pcc(plotDF[,1:5], plotDF$tropicsAgLag,nboot=100)#
+agAnova = aov(tropicsAgLag~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=plotDF)#
+trunkAnova = aov(tropicsTrunkPro~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=plotDF)#
+#
+plots=c()#
+#
+for(parName in parNames){#
+	print(parName)#
+	sens = tTPsens$PCC[parName,]$'original' #
+	minCI = tTPsens$PCC[parName,]$'min. c.i.'#
+	maxCI = tTPsens$PCC[parName,]$'max. c.i.'#
+#
+	trunkProPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsTrunkPro")) + #
+		geom_point(size = pointSize, alpha = 0.2) + #
+		xlab(NULL) +#
+		ylab(NULL) +#
+		ylim(c(0,1)) + #
+		theme_classic() + #
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes +#
+		theme(axis.text.x=element_blank()) #
+	if(parName == parNames[1]){#
+		trunkProPlot = trunkProPlot + ylab("Tropics Trunk Proportion")#
+		trunkProPlotRow = ggplotGrob(trunkProPlot)#
+	}#
+	else{#
+		trunkProPlot = trunkProPlot + theme(axis.text.y=element_blank()) #
+		trunkProPlotRow = cbind(trunkProPlotRow,ggplotGrob(trunkProPlot),size='first')#
+	}#
+}	#
+#
+for(parName in parNames){#
+	sens = round(tALsens$PCC[parName,]$'original' ,2)#
+	minCI = round(tALsens$PCC[parName,]$'min. c.i.',2)#
+	maxCI = round(tALsens$PCC[parName,]$'max. c.i.',2)#
+#
+	print(parName)		#
+	agLagPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsAgLag")) + #
+		geom_point(size = pointSize, alpha = 0.2) + #
+		xlab(headers$headerNames[headers$parNames==parName]) + #
+		ylab(NULL) + #
+		ylim(c(-0.4,0.4)) + #
+		theme_classic() +#
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes#
+	if(parName == parNames[1]){#
+		agLagPlot = agLagPlot + ylab("Tropics Antigenic Lead")#
+		agLagPlotRow = ggplotGrob(agLagPlot)#
+	}#
+	else{#
+		agLagPlot = agLagPlot + theme(axis.text.y=element_blank()) #
+		agLagPlotRow = cbind(agLagPlotRow, ggplotGrob(agLagPlot), size='first')#
+	}#
+}#
+#
+figureS2 = rbind(trunkProPlotRow,agLagPlotRow,size='first')#
+pdf(paste(plotDir,'LHS_summary.pdf',sep=''),figureWidth,figureWidth/2)#
+grid.draw(figureS2)#
+dev.off()#
+dbDisconnect(comboDb)#
+#
+print(xtable(summary(agAnova)))#
+print(xtable(summary(trunkAnova)))
+#!/usr/bin/env Rscript#
+library(RSQLite)#
+library(ggplot2)#
+library(reshape2)#
+library(gridExtra)#
+library(grid)#
+library(sensitivity)#
+library(scales)#
+library(xtable)#
+library(gtable)#
+#
+resultsDir = '../../analysis/LHS_analyses'#
+plotDir = './'#
+#
+figureWidth = 7 #
+textSize = 6#
+pointSize = 0.05#
+lineSize = .8#
+plot_themes  = 	theme_classic() +#
+				theme(axis.line = element_line(size=.3)) +#
+				theme(axis.ticks = element_line(size=.3)) +#
+				theme(axis.ticks.length = unit(-.07,'cm')) +#
+				theme(axis.ticks.margin = unit(.11,'cm')) +#
+				theme(axis.title.x=element_text(size=textSize)) + #
+				theme(axis.text.x=element_text(size= textSize)) + #
+				theme(axis.title.y=element_text(size= textSize)) +#
+				theme(axis.text.y=element_text(size= textSize)) +#
+				theme(plot.title=element_text(size=textSize)) +#
+				theme(plot.margin=unit(c(3,3,3,3),'mm')) +#
+				theme(legend.title=element_text(size=textSize)) +#
+				theme(legend.text=element_text(size=textSize)) +#
+				theme(legend.position ='bottom') +#
+				theme(legend.direction='horizontal') +#
+				theme(legend.margin = unit(-.5,'cm')) +#
+				theme(panel.border = element_rect(colour = "black", fill=NA, size=.5)) +#
+				theme(axis.line = element_blank())#
+#
+resultsDir = '../'#
+resultsDb = paste(resultsDir,'results.sqlite',sep='')#
+#
+parNames = c('relativeR0','seasonalAmplitude','relativeN','relativeTurnover','tropicFractionI0')#
+defaults = c(1.0,1.0,1.0,1.0,0.0)#
+parDefaults = data.frame('relativeN'=1.0,'tropicFractionI0'=1.0,'relativeR0'=1.0,'relativeTurnover'=1.0,'seasonalAmplitude'=0.0)#
+#
+#################################
+#FIGURE S2#
+################################
+#
+resultsDb = paste(resultsDir,'results.sqlite',sep='/')#
+#
+parNames = c('relativeR0','relativeN','tropicFractionI0','relativeTurnover','seasonalAmplitude')#
+headerNames = c('Relative R0','Relative population size','Fraction of initial infecteds in tropics','Relative turnover','Seasonal amplitude')#
+headers = data.frame(parNames,headerNames)#
+comboDb = dbConnect(SQLite(), dbname = resultsDb)#
+initExtension(comboDb)#
+#
+plotDF = dbGetQuery(comboDb, paste('SELECT',paste(parNames,collapse=','),', tropicsTrunkPro, tropicsAgLag FROM pooled_results',sep=' '))#
+tTPsens = pcc(plotDF[,1:5], plotDF$tropicsTrunkPro,nboot=100)#
+tALsens = pcc(plotDF[,1:5], plotDF$tropicsAgLag,nboot=100)#
+agAnova = aov(tropicsAgLag~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=plotDF)#
+trunkAnova = aov(tropicsTrunkPro~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=plotDF)#
+#
+plots=c()#
+#
+for(parName in parNames){#
+	print(parName)#
+	sens = tTPsens$PCC[parName,]$'original' #
+	minCI = tTPsens$PCC[parName,]$'min. c.i.'#
+	maxCI = tTPsens$PCC[parName,]$'max. c.i.'#
+#
+	trunkProPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsTrunkPro")) + #
+		geom_point(size = pointSize, alpha = 0.2) + #
+		xlab(NULL) +#
+		ylab(NULL) +#
+		ylim(c(0,1)) + #
+		theme_classic() + #
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes +#
+		theme(axis.text.x=element_blank()) #
+	if(parName == parNames[1]){#
+		trunkProPlot = trunkProPlot + ylab("Tropics Trunk Proportion")#
+		trunkProPlotRow = ggplotGrob(trunkProPlot)#
+	}#
+	else{#
+		trunkProPlot = trunkProPlot + theme(axis.text.y=element_blank()) #
+		trunkProPlotRow = cbind(trunkProPlotRow,ggplotGrob(trunkProPlot),size='first')#
+	}#
+}	#
+#
+for(parName in parNames){#
+	sens = round(tALsens$PCC[parName,]$'original' ,2)#
+	minCI = round(tALsens$PCC[parName,]$'min. c.i.',2)#
+	maxCI = round(tALsens$PCC[parName,]$'max. c.i.',2)#
+#
+	print(parName)		#
+	agLagPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsAgLag")) + #
+		geom_point(size = pointSize, alpha = 0.2) + #
+		xlab(headers$headerNames[headers$parNames==parName]) + #
+		ylab(NULL) + #
+		ylim(c(-0.4,0.4)) + #
+		theme_classic() +#
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes#
+	if(parName == parNames[1]){#
+		agLagPlot = agLagPlot + ylab("Tropics Antigenic Lead")#
+		agLagPlotRow = ggplotGrob(agLagPlot)#
+	}#
+	else{#
+		agLagPlot = agLagPlot + theme(axis.text.y=element_blank()) #
+		agLagPlotRow = cbind(agLagPlotRow, ggplotGrob(agLagPlot), size='first')#
+	}#
+}#
+#
+figureS2 = rbind(trunkProPlotRow,agLagPlotRow,size='first')#
+pdf(paste(plotDir,'LHS_summary.pdf',sep=''),figureWidth,figureWidth/2)#
+grid.draw(figureS2)#
+dev.off()#
+dbDisconnect(comboDb)#
+#
+print(xtable(summary(agAnova)))#
+print(xtable(summary(trunkAnova)))
+#!/usr/bin/env Rscript#
+library(RSQLite)#
+library(ggplot2)#
+library(reshape2)#
+library(gridExtra)#
+library(grid)#
+library(sensitivity)#
+library(scales)#
+library(xtable)#
+library(gtable)#
+#
+resultsDir = '../../analysis/LHS_analysis'#
+plotDir = './'#
+#
+figureWidth = 7 #
+textSize = 6#
+pointSize = 0.05#
+lineSize = .8#
+plot_themes  = 	theme_classic() +#
+				theme(axis.line = element_line(size=.3)) +#
+				theme(axis.ticks = element_line(size=.3)) +#
+				theme(axis.ticks.length = unit(-.07,'cm')) +#
+				theme(axis.ticks.margin = unit(.11,'cm')) +#
+				theme(axis.title.x=element_text(size=textSize)) + #
+				theme(axis.text.x=element_text(size= textSize)) + #
+				theme(axis.title.y=element_text(size= textSize)) +#
+				theme(axis.text.y=element_text(size= textSize)) +#
+				theme(plot.title=element_text(size=textSize)) +#
+				theme(plot.margin=unit(c(3,3,3,3),'mm')) +#
+				theme(legend.title=element_text(size=textSize)) +#
+				theme(legend.text=element_text(size=textSize)) +#
+				theme(legend.position ='bottom') +#
+				theme(legend.direction='horizontal') +#
+				theme(legend.margin = unit(-.5,'cm')) +#
+				theme(panel.border = element_rect(colour = "black", fill=NA, size=.5)) +#
+				theme(axis.line = element_blank())#
+#
+resultsDir = '../'#
+resultsDb = paste(resultsDir,'results.sqlite',sep='')#
+#
+parNames = c('relativeR0','seasonalAmplitude','relativeN','relativeTurnover','tropicFractionI0')#
+defaults = c(1.0,1.0,1.0,1.0,0.0)#
+parDefaults = data.frame('relativeN'=1.0,'tropicFractionI0'=1.0,'relativeR0'=1.0,'relativeTurnover'=1.0,'seasonalAmplitude'=0.0)#
+#
+#################################
+#FIGURE S2#
+################################
+#
+resultsDb = paste(resultsDir,'results.sqlite',sep='/')#
+#
+parNames = c('relativeR0','relativeN','tropicFractionI0','relativeTurnover','seasonalAmplitude')#
+headerNames = c('Relative R0','Relative population size','Fraction of initial infecteds in tropics','Relative turnover','Seasonal amplitude')#
+headers = data.frame(parNames,headerNames)#
+comboDb = dbConnect(SQLite(), dbname = resultsDb)#
+initExtension(comboDb)#
+#
+plotDF = dbGetQuery(comboDb, paste('SELECT',paste(parNames,collapse=','),', tropicsTrunkPro, tropicsAgLag FROM pooled_results',sep=' '))#
+tTPsens = pcc(plotDF[,1:5], plotDF$tropicsTrunkPro,nboot=100)#
+tALsens = pcc(plotDF[,1:5], plotDF$tropicsAgLag,nboot=100)#
+agAnova = aov(tropicsAgLag~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=plotDF)#
+trunkAnova = aov(tropicsTrunkPro~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=plotDF)#
+#
+plots=c()#
+#
+for(parName in parNames){#
+	print(parName)#
+	sens = tTPsens$PCC[parName,]$'original' #
+	minCI = tTPsens$PCC[parName,]$'min. c.i.'#
+	maxCI = tTPsens$PCC[parName,]$'max. c.i.'#
+#
+	trunkProPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsTrunkPro")) + #
+		geom_point(size = pointSize, alpha = 0.2) + #
+		xlab(NULL) +#
+		ylab(NULL) +#
+		ylim(c(0,1)) + #
+		theme_classic() + #
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes +#
+		theme(axis.text.x=element_blank()) #
+	if(parName == parNames[1]){#
+		trunkProPlot = trunkProPlot + ylab("Tropics Trunk Proportion")#
+		trunkProPlotRow = ggplotGrob(trunkProPlot)#
+	}#
+	else{#
+		trunkProPlot = trunkProPlot + theme(axis.text.y=element_blank()) #
+		trunkProPlotRow = cbind(trunkProPlotRow,ggplotGrob(trunkProPlot),size='first')#
+	}#
+}	#
+#
+for(parName in parNames){#
+	sens = round(tALsens$PCC[parName,]$'original' ,2)#
+	minCI = round(tALsens$PCC[parName,]$'min. c.i.',2)#
+	maxCI = round(tALsens$PCC[parName,]$'max. c.i.',2)#
+#
+	print(parName)		#
+	agLagPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsAgLag")) + #
+		geom_point(size = pointSize, alpha = 0.2) + #
+		xlab(headers$headerNames[headers$parNames==parName]) + #
+		ylab(NULL) + #
+		ylim(c(-0.4,0.4)) + #
+		theme_classic() +#
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes#
+	if(parName == parNames[1]){#
+		agLagPlot = agLagPlot + ylab("Tropics Antigenic Lead")#
+		agLagPlotRow = ggplotGrob(agLagPlot)#
+	}#
+	else{#
+		agLagPlot = agLagPlot + theme(axis.text.y=element_blank()) #
+		agLagPlotRow = cbind(agLagPlotRow, ggplotGrob(agLagPlot), size='first')#
+	}#
+}#
+#
+figureS2 = rbind(trunkProPlotRow,agLagPlotRow,size='first')#
+pdf(paste(plotDir,'LHS_summary.pdf',sep=''),figureWidth,figureWidth/2)#
+grid.draw(figureS2)#
+dev.off()#
+dbDisconnect(comboDb)#
+#
+print(xtable(summary(agAnova)))#
+print(xtable(summary(trunkAnova)))
+#!/usr/bin/env Rscript#
+library(RSQLite)#
+library(ggplot2)#
+library(reshape2)#
+library(gridExtra)#
+library(grid)#
+library(sensitivity)#
+library(scales)#
+library(xtable)#
+library(gtable)#
+#
+resultsDir = '../../analysis/LHS_analysis'#
+plotDir = './'#
+#
+figureWidth = 7 #
+textSize = 6#
+pointSize = 0.05#
+lineSize = .8#
+plot_themes  = 	theme_classic() +#
+				theme(axis.line = element_line(size=.3)) +#
+				theme(axis.ticks = element_line(size=.3)) +#
+				theme(axis.ticks.length = unit(-.07,'cm')) +#
+				theme(axis.ticks.margin = unit(.11,'cm')) +#
+				theme(axis.title.x=element_text(size=textSize)) + #
+				theme(axis.text.x=element_text(size= textSize)) + #
+				theme(axis.title.y=element_text(size= textSize)) +#
+				theme(axis.text.y=element_text(size= textSize)) +#
+				theme(plot.title=element_text(size=textSize)) +#
+				theme(plot.margin=unit(c(3,3,3,3),'mm')) +#
+				theme(legend.title=element_text(size=textSize)) +#
+				theme(legend.text=element_text(size=textSize)) +#
+				theme(legend.position ='bottom') +#
+				theme(legend.direction='horizontal') +#
+				theme(legend.margin = unit(-.5,'cm')) +#
+				theme(panel.border = element_rect(colour = "black", fill=NA, size=.5)) +#
+				theme(axis.line = element_blank())#
+#
+resultsDb = paste(resultsDir,'results.sqlite',sep='')#
+#
+parNames = c('relativeR0','seasonalAmplitude','relativeN','relativeTurnover','tropicFractionI0')#
+defaults = c(1.0,1.0,1.0,1.0,0.0)#
+parDefaults = data.frame('relativeN'=1.0,'tropicFractionI0'=1.0,'relativeR0'=1.0,'relativeTurnover'=1.0,'seasonalAmplitude'=0.0)#
+#
+#################################
+#FIGURE S2#
+################################
+#
+resultsDb = paste(resultsDir,'results.sqlite',sep='/')#
+#
+parNames = c('relativeR0','relativeN','tropicFractionI0','relativeTurnover','seasonalAmplitude')#
+headerNames = c('Relative R0','Relative population size','Fraction of initial infecteds in tropics','Relative turnover','Seasonal amplitude')#
+headers = data.frame(parNames,headerNames)#
+comboDb = dbConnect(SQLite(), dbname = resultsDb)#
+initExtension(comboDb)#
+#
+plotDF = dbGetQuery(comboDb, paste('SELECT',paste(parNames,collapse=','),', tropicsTrunkPro, tropicsAgLag FROM pooled_results',sep=' '))#
+tTPsens = pcc(plotDF[,1:5], plotDF$tropicsTrunkPro,nboot=100)#
+tALsens = pcc(plotDF[,1:5], plotDF$tropicsAgLag,nboot=100)#
+agAnova = aov(tropicsAgLag~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=plotDF)#
+trunkAnova = aov(tropicsTrunkPro~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=plotDF)#
+#
+plots=c()#
+#
+for(parName in parNames){#
+	print(parName)#
+	sens = tTPsens$PCC[parName,]$'original' #
+	minCI = tTPsens$PCC[parName,]$'min. c.i.'#
+	maxCI = tTPsens$PCC[parName,]$'max. c.i.'#
+#
+	trunkProPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsTrunkPro")) + #
+		geom_point(size = pointSize, alpha = 0.2) + #
+		xlab(NULL) +#
+		ylab(NULL) +#
+		ylim(c(0,1)) + #
+		theme_classic() + #
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes +#
+		theme(axis.text.x=element_blank()) #
+	if(parName == parNames[1]){#
+		trunkProPlot = trunkProPlot + ylab("Tropics Trunk Proportion")#
+		trunkProPlotRow = ggplotGrob(trunkProPlot)#
+	}#
+	else{#
+		trunkProPlot = trunkProPlot + theme(axis.text.y=element_blank()) #
+		trunkProPlotRow = cbind(trunkProPlotRow,ggplotGrob(trunkProPlot),size='first')#
+	}#
+}	#
+#
+for(parName in parNames){#
+	sens = round(tALsens$PCC[parName,]$'original' ,2)#
+	minCI = round(tALsens$PCC[parName,]$'min. c.i.',2)#
+	maxCI = round(tALsens$PCC[parName,]$'max. c.i.',2)#
+#
+	print(parName)		#
+	agLagPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsAgLag")) + #
+		geom_point(size = pointSize, alpha = 0.2) + #
+		xlab(headers$headerNames[headers$parNames==parName]) + #
+		ylab(NULL) + #
+		ylim(c(-0.4,0.4)) + #
+		theme_classic() +#
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes#
+	if(parName == parNames[1]){#
+		agLagPlot = agLagPlot + ylab("Tropics Antigenic Lead")#
+		agLagPlotRow = ggplotGrob(agLagPlot)#
+	}#
+	else{#
+		agLagPlot = agLagPlot + theme(axis.text.y=element_blank()) #
+		agLagPlotRow = cbind(agLagPlotRow, ggplotGrob(agLagPlot), size='first')#
+	}#
+}#
+#
+figureS2 = rbind(trunkProPlotRow,agLagPlotRow,size='first')#
+pdf(paste(plotDir,'LHS_summary.pdf',sep=''),figureWidth,figureWidth/2)#
+grid.draw(figureS2)#
+dev.off()#
+dbDisconnect(comboDb)#
+#
+print(xtable(summary(agAnova)))#
+print(xtable(summary(trunkAnova)))
+agAnova
+summary(agAnova)
+names(agAnova)
+agAnova$effects
+names(summary(agAnova))
+summary(agAnova)
+summary(trunkAnova)
+114/sum(5.04,.62,114.49,2.37,94.04,65.04)
+114/sum(5.04,.62,114.49,2.37,94.04)
+114.49/sum(5.04,.62,114.49,2.37,94.04)
+114.49/sum(5.04,.62,114.49,2.37,94.04,65.40)
+summary(agAnova)
+44.55/sum(1.94,.02,1.04,44.55,.02,10.56)
+44.55/sum(1.94,.02,1.04,44.55,.02)
+summary(trunkAnova)
+names(trunkAnova)
+trunkAnova$terms
+trunkAnova$model
+trunkAnova
+names(trunkAnova)
+trunkAnova$terms
+names(trunkAnova)
+trunkAnova$effects
+trunkAnova$rank
+trunkAnova
+names(trunkAnova)
+trunkAnova$coefficients
+trunkAnova$ssq
+trunkAnova$terms[2]
+trunkAnova$terms[1
+]
+trunkAnova$terms
+trunkAnova
+sum( 5.03704       ,   0.61969  ,114.49403        ,  2.37087    ,      94.03708 , 65.39707#
+)
+114.49/281.9558
+65.39/281.9558
+#!/usr/bin/env Rscript#
+library(RSQLite)#
+library(ggplot2)#
+library(reshape2)#
+library(gridExtra)#
+library(grid)#
+library(sensitivity)#
+library(scales)#
+library(xtable)#
+library(gtable)#
+#
+resultsDir = '../../analysis/LHS_analysis'#
+plotDir = './'#
+#
+figureWidth = 7 #
+textSize = 6#
+pointSize = 0.05#
+lineSize = .8#
+plot_themes  = 	theme_classic() +#
+				theme(axis.line = element_line(size=.3)) +#
+				theme(axis.ticks = element_line(size=.3)) +#
+				theme(axis.ticks.length = unit(-.07,'cm')) +#
+				theme(axis.ticks.margin = unit(.11,'cm')) +#
+				theme(axis.title.x=element_text(size=textSize)) + #
+				theme(axis.text.x=element_text(size= textSize)) + #
+				theme(axis.title.y=element_text(size= textSize)) +#
+				theme(axis.text.y=element_text(size= textSize)) +#
+				theme(plot.title=element_text(size=textSize)) +#
+				theme(plot.margin=unit(c(3,3,3,3),'mm')) +#
+				theme(legend.title=element_text(size=textSize)) +#
+				theme(legend.text=element_text(size=textSize)) +#
+				theme(legend.position ='bottom') +#
+				theme(legend.direction='horizontal') +#
+				theme(legend.margin = unit(-.5,'cm')) +#
+				theme(panel.border = element_rect(colour = "black", fill=NA, size=.5)) +#
+				theme(axis.line = element_blank())#
+#
+resultsDb = paste(resultsDir,'results.sqlite',sep='')#
+#
+parNames = c('relativeR0','seasonalAmplitude','relativeN','relativeTurnover','tropicFractionI0')#
+defaults = c(1.0,1.0,1.0,1.0,0.0)#
+parDefaults = data.frame('relativeN'=1.0,'tropicFractionI0'=1.0,'relativeR0'=1.0,'relativeTurnover'=1.0,'seasonalAmplitude'=0.0)#
+#
+resultsDb = paste(resultsDir,'results.sqlite',sep='/')#
+#
+parNames = c('relativeR0','relativeN','tropicFractionI0','relativeTurnover','seasonalAmplitude')#
+headerNames = c('\"Relative R\"[0]','\"Relative population size\"','\"Fraction of initial infecteds in tropics\"','\"Relative turnover\"','\"Seasonal amplitude\"')#
+headers = data.frame(parNames,headerNames)#
+comboDb = dbConnect(SQLite(), dbname = resultsDb)#
+initExtension(comboDb)#
+#
+plotDF = dbGetQuery(comboDb, paste('SELECT',paste(parNames,collapse=','),', tropicsTrunkPro, tropicsAgLag FROM pooled_results',sep=' '))#
+tTPsens = pcc(plotDF[,1:5], plotDF$tropicsTrunkPro,nboot=100)#
+tALsens = pcc(plotDF[,1:5], plotDF$tropicsAgLag,nboot=100)#
+agAnova = aov(tropicsAgLag~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=plotDF)#
+trunkAnova = aov(tropicsTrunkPro~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=plotDF)#
+#
+plots=c()#
+#
+for(parName in parNames){#
+	print(parName)#
+	sens = tTPsens$PCC[parName,]$'original' #
+	minCI = tTPsens$PCC[parName,]$'min. c.i.'#
+	maxCI = tTPsens$PCC[parName,]$'max. c.i.'#
+#
+	trunkProPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsTrunkPro")) + #
+		geom_point(size = pointSize, alpha = 0.2) + #
+		xlab(NULL) +#
+		ylab(NULL) +#
+		ylim(c(0,1)) + #
+		theme_classic() + #
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes +#
+		theme(axis.text.x=element_blank()) #
+	if(parName == parNames[1]){#
+		trunkProPlot = trunkProPlot + ylab("Tropics Trunk Proportion")#
+		trunkProPlotRow = ggplotGrob(trunkProPlot)#
+	}#
+	else{#
+		trunkProPlot = trunkProPlot + theme(axis.text.y=element_blank()) #
+		trunkProPlotRow = cbind(trunkProPlotRow,ggplotGrob(trunkProPlot),size='first')#
+	}#
+}	#
+#
+for(parName in parNames){#
+	sens = round(tALsens$PCC[parName,]$'original' ,2)#
+	minCI = round(tALsens$PCC[parName,]$'min. c.i.',2)#
+	maxCI = round(tALsens$PCC[parName,]$'max. c.i.',2)#
+#
+	print(parName)		#
+	agLagPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsAgLag")) + #
+		geom_point(size = pointSize, alpha = 0.2) + #
+		xlab(headers$headerNames[headers$parNames==parName]) + #
+		ylab(NULL) + #
+		ylim(c(-0.4,0.4)) + #
+		theme_classic() +#
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes#
+	if(parName == parNames[1]){#
+		agLagPlot = agLagPlot + ylab("Tropics Antigenic Lead")#
+		agLagPlotRow = ggplotGrob(agLagPlot)#
+	}#
+	else{#
+		agLagPlot = agLagPlot + theme(axis.text.y=element_blank()) #
+		agLagPlotRow = cbind(agLagPlotRow, ggplotGrob(agLagPlot), size='first')#
+	}#
+}#
+#
+figureS2 = rbind(trunkProPlotRow,agLagPlotRow,size='first')#
+pdf(paste(plotDir,'LHS_summary.pdf',sep=''),figureWidth,figureWidth/2)#
+grid.draw(figureS2)#
+dev.off()#
+dbDisconnect(comboDb)#
+#
+print(xtable(summary(agAnova)))#
+print(xtable(summary(trunkAnova)))
+#!/usr/bin/env Rscript#
+library(RSQLite)#
+library(ggplot2)#
+library(reshape2)#
+library(gridExtra)#
+library(grid)#
+library(sensitivity)#
+library(scales)#
+library(xtable)#
+library(gtable)#
+#
+resultsDir = '../../analysis/LHS_analysis'#
+plotDir = './'#
+#
+figureWidth = 7 #
+textSize = 6#
+pointSize = 0.05#
+lineSize = .8#
+plot_themes  = 	theme_classic() +#
+				theme(axis.line = element_line(size=.3)) +#
+				theme(axis.ticks = element_line(size=.3)) +#
+				theme(axis.ticks.length = unit(-.07,'cm')) +#
+				theme(axis.ticks.margin = unit(.11,'cm')) +#
+				theme(axis.title.x=element_text(size=textSize)) + #
+				theme(axis.text.x=element_text(size= textSize)) + #
+				theme(axis.title.y=element_text(size= textSize)) +#
+				theme(axis.text.y=element_text(size= textSize)) +#
+				theme(plot.title=element_text(size=textSize)) +#
+				theme(plot.margin=unit(c(3,3,3,3),'mm')) +#
+				theme(legend.title=element_text(size=textSize)) +#
+				theme(legend.text=element_text(size=textSize)) +#
+				theme(legend.position ='bottom') +#
+				theme(legend.direction='horizontal') +#
+				theme(legend.margin = unit(-.5,'cm')) +#
+				theme(panel.border = element_rect(colour = "black", fill=NA, size=.5)) +#
+				theme(axis.line = element_blank())#
+#
+resultsDb = paste(resultsDir,'results.sqlite',sep='')#
+#
+parNames = c('relativeR0','seasonalAmplitude','relativeN','relativeTurnover','tropicFractionI0')#
+defaults = c(1.0,1.0,1.0,1.0,0.0)#
+parDefaults = data.frame('relativeN'=1.0,'tropicFractionI0'=1.0,'relativeR0'=1.0,'relativeTurnover'=1.0,'seasonalAmplitude'=0.0)#
+#
+resultsDb = paste(resultsDir,'results.sqlite',sep='/')#
+#
+parNames = c('relativeR0','relativeN','tropicFractionI0','relativeTurnover','seasonalAmplitude')#
+headerNames = c('\"Relative R\"[0]','\"Relative population size\"','\"Fraction of initial infecteds in tropics\"','\"Relative turnover\"','\"Seasonal amplitude\"')#
+headers = data.frame(parNames,headerNames)#
+comboDb = dbConnect(SQLite(), dbname = resultsDb)#
+initExtension(comboDb)#
+#
+plotDF = dbGetQuery(comboDb, paste('SELECT',paste(parNames,collapse=','),', tropicsTrunkPro, tropicsAgLag FROM pooled_results',sep=' '))#
+tTPsens = pcc(plotDF[,1:5], plotDF$tropicsTrunkPro,nboot=100)#
+tALsens = pcc(plotDF[,1:5], plotDF$tropicsAgLag,nboot=100)#
+agAnova = aov(tropicsAgLag~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=plotDF)#
+trunkAnova = aov(tropicsTrunkPro~relativeN+ tropicFractionI0 +relativeR0+relativeTurnover+seasonalAmplitude,data=plotDF)#
+#
+plots=c()#
+#
+for(parName in parNames){#
+	print(parName)#
+	sens = tTPsens$PCC[parName,]$'original' #
+	minCI = tTPsens$PCC[parName,]$'min. c.i.'#
+	maxCI = tTPsens$PCC[parName,]$'max. c.i.'#
+#
+	trunkProPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsTrunkPro")) + #
+		geom_point(size = pointSize, alpha = 0.2) + #
+		xlab(NULL) +#
+		ylab(NULL) +#
+		ylim(c(0,1)) + #
+		theme_classic() + #
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes +#
+		theme(axis.text.x=element_blank()) #
+	if(parName == parNames[1]){#
+		trunkProPlot = trunkProPlot + ylab("Tropics Trunk Proportion")#
+		trunkProPlotRow = ggplotGrob(trunkProPlot)#
+	}#
+	else{#
+		trunkProPlot = trunkProPlot + theme(axis.text.y=element_blank()) #
+		trunkProPlotRow = cbind(trunkProPlotRow,ggplotGrob(trunkProPlot),size='first')#
+	}#
+}	#
+#
+for(parName in parNames){#
+	sens = round(tALsens$PCC[parName,]$'original' ,2)#
+	minCI = round(tALsens$PCC[parName,]$'min. c.i.',2)#
+	maxCI = round(tALsens$PCC[parName,]$'max. c.i.',2)#
+#
+	print(parName)		#
+	agLagPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsAgLag")) + #
+		geom_point(size = pointSize, alpha = 0.2) + #
+		xlab(parse(text=paste(headers$headerNames[headers$parNames==parName]))) + #
+		ylab(NULL) + #
+		ylim(c(-0.4,0.4)) + #
+		theme_classic() +#
+		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +#
+		plot_themes#
+	if(parName == parNames[1]){#
+		agLagPlot = agLagPlot + ylab("Tropics Antigenic Lead")#
+		agLagPlotRow = ggplotGrob(agLagPlot)#
+	}#
+	else{#
+		agLagPlot = agLagPlot + theme(axis.text.y=element_blank()) #
+		agLagPlotRow = cbind(agLagPlotRow, ggplotGrob(agLagPlot), size='first')#
+	}#
+}#
+#
+figureS2 = rbind(trunkProPlotRow,agLagPlotRow,size='first')#
+pdf(paste(plotDir,'LHS_summary.pdf',sep=''),figureWidth,figureWidth/2)#
+grid.draw(figureS2)#
+dev.off()#
+dbDisconnect(comboDb)#
+#
+print(xtable(summary(agAnova)))#
+print(xtable(summary(trunkAnova)))
+summary(trunkAnova)
+trunkAnova
+sum(5.03704          0.61969  114.49403          2.37087          94.03708  65.39707)
+sum(5.03704        ,  0.61969  ,114.49403      ,    2.37087     ,     94.03708 , 65.39707)
+c(5.03704        ,  0.61969  ,114.49403      ,    2.37087     ,     94.03708 , 65.39707)
+c(5.03704        ,  0.61969  ,114.49403      ,    2.37087     ,     94.03708 , 65.39707)/sum(5.03704        ,  0.61969  ,114.49403      ,    2.37087     ,     94.03708 , 65.39707)
+sum(c(5.03704        ,  0.61969  ,114.49403      ,    2.37087     ,     94.03708 , 65.39707)/sum(5.03704        ,  0.61969  ,114.49403      ,    2.37087     ,     94.03708 , 65.39707)#
+)
+agAnova
+summary(agAnova)
+xtable(agAnva)
+xtable(agAnova)
+sum(1.93868      ,   0.02249  , 44.55378      ,    1.04500     ,      0.02449 , 10.55507#
+)
+c(1.93868      ,   0.02249  , 44.55378      ,    1.04500     ,      0.02449 , 10.55507/sum(1.93868      ,   0.02249  , 44.55378      ,    1.04500     ,      0.02449 , 10.55507)#
+)
+c(1.93868      ,   0.02249  , 44.55378      ,    1.04500     ,      0.02449 , 10.55507)/sum(1.93868      ,   0.02249  , 44.55378      ,    1.04500     ,      0.02449 , 10.55507)
