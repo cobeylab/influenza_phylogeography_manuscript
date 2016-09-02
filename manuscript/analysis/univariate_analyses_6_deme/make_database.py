@@ -52,11 +52,11 @@ def getData(fileName, jobDir, runId, comboDb):
         cw = list(csv.reader(f, delimiter=','))
         dat = [float(x) for y in cw for x in y]
         if(fileName == 'trunkProportions'):
-            return(dat[0])
+            return([dat[0],dat[1]])
         elif(fileName == 'antigenicLagAG1'):
-            return(dat[1])
+            return([dat[1], dat[4]])
         else:
-            return(dat[0])
+            return([dat[0]])
 
 # Load mathematica outputs from SQLite
 def loadMathSqlite(fileName, jobDir, runId, mathDb, comboDb):
@@ -99,9 +99,9 @@ def loadJob(comboDb, resultsDir, runId, jobDir):
         if ((not os.path.isfile(os.path.join(jobDir, 'out.extinct'))) and (not os.path.isfile(os.path.join(jobDir, 'out.tmrcaLimit'))) and os.path.isfile(os.path.join(jobDir, 'out.branches'))):
             for fileName in csvFiles:
                 loadCsvData(fileName,jobDir,runId, comboDb)
-            insert(comboDb, 'pooled_results', [runId] + [paramVals[paramName] for paramName in PARAMS] + [extinct, excessDiversity, fluLike] + [getData(fileName,jobDir,runId, comboDb) for fileName in csvFiles])
+            insert(comboDb, 'pooled_results', [runId] + [paramVals[paramName] for paramName in PARAMS] + [extinct, excessDiversity, fluLike] + [x for y in [getData(fileName,jobDir,runId, comboDb) for fileName in csvFiles] for x in y])
         else:
-            insert(comboDb, 'pooled_results', [runId] + [paramVals[paramName] for paramName in PARAMS] + [extinct, excessDiversity, fluLike] + [None, None, None, None, None])
+            insert(comboDb, 'pooled_results', [runId] + [paramVals[paramName] for paramName in PARAMS] + [extinct, excessDiversity, fluLike] + [None, None, None, None, None, None, None])
     except:
         pass
         
@@ -149,7 +149,7 @@ if __name__ == "__main__":
     comboDb.execute("CREATE TABLE trunkProportions (runId INTEGER, tropics1 REAL, tropics2 REAL, north1 REAL, north2 REAL, south1 REAL, south2 REAL);" )
     comboDb.execute("CREATE TABLE meanAnnualIncidence (runId INTEGER, meanAnnualIncidence REAL);")
     comboDb.execute(
-        "CREATE TABLE pooled_results (runId INTEGER, {0}, extinct INTEGER, excessDiversity INTEGER, fluLike INTEGER, meanFluxRate REAL, tropics1AgLag REAL, tropics1TrunkPro REAL, meanAnnualIncidence REAL, meanTMRCA REAL);".format(
+        "CREATE TABLE pooled_results (runId INTEGER, {0}, extinct INTEGER, excessDiversity INTEGER, fluLike INTEGER, meanFluxRate REAL, tropics1AgLag REAL, tropics2AgLag REAL, tropics1TrunkPro REAL, tropics2TrunkPro REAL, meanAnnualIncidence REAL, meanTMRCA REAL);".format(
             ', '.join([paramName + ' ' + PARAM_TYPES[paramName] for paramName in PARAMS])
         )
     )

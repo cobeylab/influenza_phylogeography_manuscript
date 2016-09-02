@@ -13,7 +13,7 @@ resultsDir = '../../analysis/LHS_analysis'
 plotDir = './'
 
 figureWidth = 7 
-textSize = 6
+textSize = 8
 pointSize = 0.05
 lineSize = .8
 plot_themes  = 	theme_classic() +
@@ -33,12 +33,13 @@ plot_themes  = 	theme_classic() +
 				theme(legend.direction='horizontal') +
 				theme(legend.margin = unit(-.5,'cm')) +
 				theme(panel.border = element_rect(colour = "black", fill=NA, size=.5)) +
-				theme(axis.line = element_blank())
+				theme(axis.line = element_blank()) +
+				theme(text = element_text(family='serif'))
 
 resultsDb = paste(resultsDir,'results.sqlite',sep='/')
 
 parNames = c('relativeR0','seasonalAmplitude','relativeN','relativeTurnover','tropicFractionI0')
-headerNames = c('\"Relative R\"[0]','\"Seasonal amplitude\"','\"Relative population size\"','\"Relative turnover\"','\"Fraction of initial infecteds in tropics\"')
+headerNames = c('\"relative R\"[0]','\"seasonal amplitude\"','\"relative population size\"','\"relative turnover\"','\"tropics\' frac. of init. infecteds\"')
 headers = data.frame(parNames,headerNames)
 comboDb = dbConnect(SQLite(), dbname = resultsDb)
 initExtension(comboDb)
@@ -68,7 +69,7 @@ for(parName in parNames){
 		theme(axis.text.x=element_blank()) 
 	
 	if(parName == parNames[1]){
-		trunkProPlot = trunkProPlot + ylab("Tropics Trunk Proportion")
+		trunkProPlot = trunkProPlot + ylab("tropics trunk proportion")
 		trunkProPlotRow = ggplotGrob(trunkProPlot)
 	}
 	else{
@@ -92,11 +93,18 @@ for(parName in parNames){
 		ggtitle(paste('r = ',round(sens,2), '\n95% CI: (',round(minCI,2),', ',round(maxCI,2),')',sep='')) +
 		plot_themes
 		
+		
 	if(parName == parNames[1]){
-		agLagPlot = agLagPlot + ylab("Tropics Antigenic Lead")
+		agLagPlot = agLagPlot + ylab("tropics antigenic lead")
 		agLagPlotRow = ggplotGrob(agLagPlot)
 	}
+
+	
 	else{
+		if(parName == parNames[2]){
+			agLagPlot = agLagPlot + scale_x_continuous(breaks=c(0,0.1,0.2))
+		}
+	
 		agLagPlot = agLagPlot + theme(axis.text.y=element_blank()) 
 		agLagPlotRow = cbind(agLagPlotRow, ggplotGrob(agLagPlot), size='first')
 	}

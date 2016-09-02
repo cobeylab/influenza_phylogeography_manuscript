@@ -16,7 +16,7 @@ parNames = c('meanStep','sdStep','muPhenotype')
 reps = 10
 comboDb = dbConnect(SQLite(), dbname = resultsDb)
 initExtension(comboDb)
-textSize = 6
+textSize = 9
 plot_themes  = 	theme_classic() +
 				theme(axis.line = element_line(size=.3)) +
 				theme(axis.ticks = element_line(size=.3)) +
@@ -32,7 +32,8 @@ plot_themes  = 	theme_classic() +
 				theme(legend.text=element_text(size=textSize)) +
 				theme(legend.position ='none') +
 				theme(panel.border = element_rect(colour = "black", fill=NA, size=.5)) +
-				theme(axis.line = element_blank()) 
+				theme(axis.line = element_blank()) + 
+				theme(text = element_text(family='serif'))
 								
 blank_axes = theme(axis.title.x=element_blank()) + 
 			theme(axis.text.x=element_blank()) + 
@@ -60,19 +61,9 @@ for(plotMu in MUPHENOTYPES){
 
 	plotDF = subset(summaryDF, muPhenotype == plotMu)
 	
-	fluStatPlot = ggplot(plotDF, aes_string(x=parName1,y=parName2)) + 
-		geom_tile(aes(fill=fluStat)) + 
-		scale_fill_gradient2("Flu like",limits=c(0,reps),low='#2A4A7F',high="#800000",midpoint=reps/2) +
-		xlab(expression(beta['mean'])) + 
-		ylab(parName2) + 
-		plot_themes +
-		ggtitle(paste('mu = ',plotMu)) + #,'\nFlu-like: R0 = ',plotR0)) +
-			scale_x_continuous(expand = c(0,0)) +
-			scale_y_continuous(expand = c(0,0)) 
-	
 	fluLikePlot = ggplot(plotDF, aes_string(x=parName1,y=parName2)) + 
 		geom_tile(aes(fill=fluLike)) + 
-		scale_fill_gradient2("Flu like counts",limits=c(0,reps),low='#2A4A7F',high="#800000",midpoint=reps/2) +
+		scale_fill_gradient2("flu-like counts",limits=c(0,reps),low='#2A4A7F',high="#800000",midpoint=reps/2) +
 		ylab(substitute(delta[sd])) + 
 		plot_themes +
 		theme(axis.title.x=element_blank()) + 
@@ -83,7 +74,7 @@ for(plotMu in MUPHENOTYPES){
 			
 	extinctPlot = ggplot(plotDF, aes_string(x=parName1,y=parName2)) + 
 		geom_tile(aes(fill=extinct)) + 
-		scale_fill_gradient2("Extinction counts",limits=c(0,reps),low='#2A4A7F',high="#800000",midpoint=reps/2) +
+		scale_fill_gradient2("extinction counts",limits=c(0,reps),low='#2A4A7F',high="#800000",midpoint=reps/2) +
 		#xlab(substitute(delta[mean])) + 
 		#ylab(substitute(delta[sd])) + 
  			plot_themes +
@@ -93,7 +84,7 @@ for(plotMu in MUPHENOTYPES){
 
 	diversityPlot = ggplot(plotDF, aes_string(x=parName1,y=parName2)) + 
 		geom_tile(aes(fill=excessDiversity)) + 
-		scale_fill_gradient2("Excess diversity counts",limits=c(0,reps),low='#2A4A7F',high="#800000",midpoint=reps/2) +
+		scale_fill_gradient2("excess diversity counts",limits=c(0,reps),low='#2A4A7F',high="#800000",midpoint=reps/2) +
 		plot_themes +
 		blank_axes +
 		scale_x_continuous(expand = c(0,0)) +
@@ -101,7 +92,7 @@ for(plotMu in MUPHENOTYPES){
 
 	meanFluxPlot = ggplot(plotDF, aes_string(x=parName1,y=parName2)) + 
 		geom_tile(aes(fill=as.numeric(meanFluxRate))) + 
-		scale_fill_gradientn('Mean antigenic flux',
+		scale_fill_gradientn('mean antigenic drift',
 							colours=c('#2A4A7F','white',"#800000"),
 							values = rescale(c(0,1.0,3.0)),
 							guide = 'colorbar', limits = c(0,3.0)) +	
@@ -112,7 +103,7 @@ for(plotMu in MUPHENOTYPES){
 		
 	incidencePlot = ggplot(plotDF, aes_string(x=parName1,y=parName2)) + 
 		geom_tile(aes(fill=as.numeric(meanAnnualIncidence))) + 
-		scale_fill_gradientn('Incidence',
+		scale_fill_gradientn('incidence',
 							colours=c('#2A4A7F','white',"#800000"),
 							values = rescale(c(0,.12,.35)),
 							guide = 'colorbar', limits = c(0,.35)) +	
@@ -129,11 +120,11 @@ for(plotMu in MUPHENOTYPES){
 			theme(legend.key.height=unit(.2,'cm')) +
 			theme(plot.margin=unit(c(1,1,1,1),'mm')) +
 			theme(legend.margin = unit(0,'mm')) 
-		fluLikePlot = fluLikePlot + legend_themes +	guides(fill=guide_colorbar(barwidth=4,barheight=0.2,title.position='bottom')) + xlabels + xlab(substitute(delta[mean]))
-		extinctPlot = extinctPlot + legend_themes +guides(fill=guide_colorbar(barwidth=4,barheight=0.2,title.position='bottom')) + xlabels + xlab(substitute(delta[mean]))
-		diversityPlot = diversityPlot + legend_themes +guides(fill=guide_colorbar(barwidth=4,barheight=0.2,title.position='bottom')) + xlabels + xlab(substitute(delta[mean]))
-		meanFluxPlot = meanFluxPlot+ legend_themes +guides(fill=guide_colorbar(barwidth=4,barheight=0.2,title.position='bottom')) + xlabels + xlab(substitute(delta[mean]))
-		incidencePlot = incidencePlot + legend_themes +guides(fill=guide_colorbar(barwidth=4,barheight=0.2,title.position='bottom')) + xlabels + xlab(substitute(delta[mean]))
+		fluLikePlot = fluLikePlot + legend_themes +	guides(fill=guide_colorbar(barwidth=5,barheight=0.3,title.position='bottom')) + xlabels + xlab(substitute(delta[mean]))
+		extinctPlot = extinctPlot + legend_themes +guides(fill=guide_colorbar(barwidth=5,barheight=0.3,title.position='bottom')) + xlabels + xlab(substitute(delta[mean]))
+		diversityPlot = diversityPlot + legend_themes +guides(fill=guide_colorbar(barwidth=5,barheight=0.3,title.position='bottom')) + xlabels + xlab(substitute(delta[mean]))
+		meanFluxPlot = meanFluxPlot+ legend_themes +guides(fill=guide_colorbar(barwidth=5,barheight=0.3,title.position='bottom')) + xlabels + xlab(substitute(delta[mean]))
+		incidencePlot = incidencePlot + legend_themes +guides(fill=guide_colorbar(barwidth=5,barheight=0.3,title.position='bottom')) + xlabels + xlab(substitute(delta[mean]))
 
 	}
 	thisRow = cbind(ggplotGrob(fluLikePlot), ggplotGrob(extinctPlot), ggplotGrob(diversityPlot), ggplotGrob(meanFluxPlot), ggplotGrob(incidencePlot),size = 'first')

@@ -13,6 +13,7 @@ library(gtable)
 library(plyr)
 
 resultsDir = '../../analysis/univariate_analyses/'
+resultsDir = './'
 plotDir = './'
 resultsDb = paste(resultsDir,'results.sqlite',sep='')
 

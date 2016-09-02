@@ -2,13 +2,15 @@
 
 \pdfoutput=1
 
+\usepackage{geometry}
+\geometry{margin=1in}
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{cite}
 \usepackage{authblk}
-\usepackage{xcolor}
 \usepackage{hyperref}
-\bibliographystyle{unsrt}
+\usepackage{xcolor}
+\bibliographystyle{vancouver}
 
 \title{Explaining the geographic origins of seasonal influenza A (H3N2)}
 
@@ -38,18 +40,20 @@ These drifted strains are less easily recognized by host immunity and therefore 
 More antigenically advanced strains are also more likely to spread globally and successfully perpetuate the evolutionary lineage of subsequent variants.
 
 Asia has long been recognized as a major source of not only new influenza subtypes but also new strains of seasonal influenza \cite{Shortridge:1982wo, Webster:1992wl, Cox:1994ui, Cox:2000gq}. 
-Phylogeographic analyses have shown that East, South, and Southeast Asia contribute disproportionately to the evolution of seasonal H3N2, exporting most of the evolutionarily successful strains that eventually spread globally \cite{Rambaut:2008ew,Russell:2008ke,Bahl:2011ep, Bedford:2010el, Bedford:2015fj}. 
-The trunk of H3N2's phylogeny traces the evolutionary path of the most successful lineage and is estimated to be located in Asia 87\% of the time \cite{Bedford:2015fj}.
+Influenza A/H3N2, A/H1N1, and two B lineages currently circulate in the human population, with the H3N2 subtype causing the most disease \cite{FluNet}.
+Phylogeographic analyses show that East, South, and Southeast Asia contribute disproportionately to the evolution of seasonal H3N2, exporting most of the evolutionarily successful strains that eventually spread globally \cite{Rambaut:2008ew,Russell:2008ke,Bahl:2011ep, Bedford:2010el, Bedford:2015fj}. 
+The trunk of H3N2's phylogeny traces the evolutionary path of the most successful lineage and was estimated to be located in Asia 87\% of the time from 2000 to 2010 \cite{Bedford:2015fj}.
 Additionally, strains of H3N2 isolated in E-SE Asia appear to be more antigenically advanced, with new antigenic variants emerging earlier in E-SE Asia than in the rest of the world \cite{Russell:2008ke, Bedford:2014bf}.
 These observations suggest that ecological differences between regions, such as climate and human demography, affect the local antigenic evolution of H3N2, which in turn shapes its global migratory patterns.
-Here we ask what ecological factors might explain the disproportionate contributions of particular host populations to the evolution of an influenza-like pathogen.
-This information may be immediately useful for viral forecasting.  
-Over the long term, it could help predict changes in influenza's phylogeography and identify effective global vaccination strategies.
+Here we ask what ecological factors might cause disproportionate contributions of particular host populations to the evolution of an influenza-like pathogen.
+This information may be immediately useful for viral forecasting. 
+Over the long term, it could help predict changes in influenza's phylogeography and identify source populations to improve global vaccination strategies.
 
-The conspicuous role of tropical regions in H3N2 evolution has been attributed to the seasonal nature of influenza, which experiences pronounced winter epidemics in temperate regions \cite{Webster:1992wl, Viboud:2006ge, Rambaut:2008ew, Russell:2008ke, Bedford:2010el, Bahl:2011ep}.
-Bottlenecks from late spring through autumn necessarily limit local evolution and reduce opportunities for strain emigration \cite{Adams:2011dh, Zinder:2014jx}. 
-By contrast, in tropical and subtropical Asia, semiconnected host populations support asynchronous epidemics that enable regional persistence year-round \cite{Viboud:2006ge, Russell:2008ke, Cheng:2013hb}. 
-Smaller contributions from other tropical and subtropical regions might arise from the weaker connectivity of their host populations \cite{Bedford:2010el, Chan:2010fu, Lemey:2014ez}. 
+The conspicuous role of Asia in H3N2's evolution has been attributed to the seasonal nature of influenza in temperate regions \cite{Webster:1992wl, Viboud:2006ge, Rambaut:2008ew, Russell:2008ke, Bedford:2010el, Bahl:2011ep}.
+Approximately 85\% of Asia's population and 48\% of the global population resides in a climatically tropical or subtropical region \cite{GPWv3} where semiconnected host populations support asynchronous epidemics that enable regional persistence year-round \cite{Viboud:2006ge, Russell:2008ke, Cheng:2013hb}. 
+Uninterrupted transmission might increase both the efficiency of selection and the probability of strain survival and global spread.
+By contrast, transmission bottlenecks from late spring through autumn in temperate populations necessarily limit local evolution and reduce opportunities for strain emigration \cite{Adams:2011dh, Zinder:2014jx}. 
+Smaller contributions from other tropical and subtropical regions might arise from the weaker connectivity of their host populations \cite{Bedford:2010el, Chan:2010fu, Lemey:2014ez}.
 
 Although seasonality clearly affects temporal patterns of viral migration \cite{Bahl:2011ep}, a robust explanation for differences in regions' long-term contributions to the evolution of H3N2 would consider the effects of seasonal variation in transmission in light of other potentially influential differences among host populations, including:
 
@@ -72,63 +76,74 @@ The first epidemic will almost certainly occur in this region, and viruses here 
 If host migration rates are low and the founding viral population persists, this antigenic lead could be maintained or even grow in time. 
 
 \textit{Transmission rates.}
-Differences in human behavior can affect transmission rates.
+Differences in human behaviour can affect transmission rates.
 The transmission rate affects a strain's intrinsic reproductive number ($R_0$), the expected number of secondary cases caused by a single infection in an otherwise susceptible population.
 Differences in regional $R_0$ could affect evolution in at least two ways.
 Higher $R_0$ increases the equilibrium prevalence, increasing the probability that rare beneficial mutations will appear. 
 In addition, the rate of antigenic drift increases with $R_0$ in models that include mutation as a diffusion-like process \cite{Lin:2003ht,Gog:2002bi, Kucharski:2012ez, Bedford:2015fj}. 
 A higher intrinsic reproductive number in one population could thus accelerate the emergence of novel mutants in that area. 
 
-To determine the potential effects of these five factors on the evolution of H3N2 in space, we simulated an influenza-like pathogen in three regions, representing the temperate north, tropics, and temperate south, and analyzed the effects of these factors on two key metrics of influenza's spatial evolutionary and antigenic dynamics.
-The first metric measures the proportion of the trunk of the phylogeny present in the tropics (Fig.~\ref{fig:example_run}A).
+To understand the potential effects of these five factors on the evolution of H3N2 in space, we simulated an influenza-like pathogen in a simplified representation of the global human metapopulation.
+The simulated metapopulation consisted of three connected host populations, representing the temperate north, tropics, and temperate south.
+Conceptually, the tropics in the model approximate Asia, where most of the population is tropical or subtropical \cite{GPWv3} and epidemics are asynchronous, and exclude other less connected tropical and subtropical populations on other continents\cite{Bedford:2010el, Chan:2010fu, Lemey:2014ez}. 
+The two temperate populations approximate northern and southern populations where influenza is strongly seasonal. 
+The model can also be generalized to represent three arbitrary populations by reducing seasonality.
+
+We analysed the effects of these factors on two key metrics of influenza's spatial evolutionary and antigenic dynamics.
+The first metric measures the proportion of the trunk of the phylogeny present in the tropics (figure~\ref{fig:example_run}\textit{a}).
 The phylogenetic trunk represents the most evolutionarily successful lineage that goes on to seed all future outbreaks.
-The second metric measures the degree to which tropical strains are antigenically advanced (Fig.~\ref{fig:example_run}B).
+The second metric measures the degree to which tropical strains are antigenically advanced (figure~\ref{fig:example_run}\textit{b}).
 Phenotypically, antigenic dissimilarities can be quantified as distances in antigenic space using pairwise measures of cross reactivity \cite{Smith:2004jc, Bedford:2014bf}.
 Our model uses an analogous measure of antigenic distances, allowing us to determine the relative antigenic advancement of strains from each region.
+We analysed these two metrics from simulations to test whether any of the five ecological factors could create spatial evolutionary patterns of a similar magnitude to the observed data.
 
 \section{Results}
 \subsection{Influenza-like patterns}
 We simulated an individual-based model that included ecological and evolutionary dynamics in a metapopulation with three demes \cite{Bedford:2012bx}. 
-In one deme, transmission rates are constant throughout the year, and in the two others, transmission rates vary sinusoidally with opposing phases.
+By default, in one deme, transmission rates are constant throughout the year, and in the two others, transmission rates vary sinusoidally with opposing phases.
 Viral phenotypes occur as points in 2D Euclidean space, and mutation displaces phenotypes in this 2D space according to a fixed kernel \cite{Bedford:2012bx}.
 This space is analogous to an antigenic map constructed from pairwise measurements of cross-reactivity between influenza strains using a hemagglutination inhibition (HI) assay \cite{Smith:2004jc, Bedford:2014bf}.
 Susceptibility to infection is proportional to the distance in antigenic space between the challenging strain and the nearest strain in the host's infection history, giving distant or antigenically advanced strains greater transmissive advantage.
 
-The model reproduces characteristic ecological and evolutionary features of H3N2, except the antigenic lead in the tropics (Table \ref{tab:flu_metrics}), under the default parameters (Table \ref{tab:default_parameters}). 
-We restricted our analyses to simulations where the virus remained endemic and where the time to the most recent common ancestor (TMRCA) never exceeded 10 years during the 40 years of simulation. 
-Of 100 replicate simulations, the viral population went extinct in 18 cases and exceeded the TMRCA threshold 29 times, leaving 53 simulations for analysis.
-The model tracks the ancestry of individual strains, allowing us to explicitly reconstruct the phylogeny of the virus and the geographic location of lineages.
-The phylogeny has the characteristically well-defined trunk with short branches of the H3N2 hemagglutinin (Fig.~\ref{fig:example_run}). 
-This shape arises due repeated selective sweeps of antigenic variants, which reduces standing diversity; the average TMRCA across replicates was 3.72 years (SD = 0.26), comparable to empirical estimates of 3.89 years \cite{Bedford:2015fj}.
-The antigenic distance from the founder increased linearly with time (Fig.~\ref{fig:example_run}), characteristic of H3N2's canalized antigenic evolution \cite{Bedford:2012bx,Smith:2004jc}. 
-The mean antigenic drift across replicate simulations was 0.97 antigenic units per year (SD = 0.11), comparable to observed rates of 1.01 antigenic units per year \cite{Bedford:2014bf}. 
-The mean annual incidence was 9.1\% (SD = 0.8\%), in agreement with estimates of 9-15\% for all seasonal influenza reported by the World Health Organization \cite{WHO:2014}.
-
 \begin{figure}[h!]
-\centerline{\includegraphics[width=3.42in]{./manuscript/figures/example_run/example_run.pdf}}
-\caption{Representative output showing influenza-like behavior from a sample simulation using the default parameters (Table \ref{tab:default_parameters}). 
+\centerline{\includegraphics{manuscript/figures/example_run/example_run.pdf}}
+\caption{Representative output showing influenza-like behaviour from a sample simulation using the default parameters (table \ref{tab:default_parameters}). 
 Statistics reported here are based on 53 replicate simulations. 
-(A) The phylogeny of the pathogen is reconstructed explicitly from the recorded ancestry of simulated strains. 
-Branches are colored by region indicated in panel D. 
+(\textit{a}) The phylogeny of the pathogen is reconstructed explicitly from the recorded ancestry of simulated strains. 
+Branches are colored by region indicated in panel \textit{d}. 
 The trunk is determined by tracing the recorded ancestry of surviving strains at the end of the simulation. 
 Side branches show lineages that go extinct.
-(B) Viruses evolve antigenically away from the founding strain in a canalized fashion.
+(\textit{b}) Viruses evolve antigenically away from the founding strain in a canalized fashion.
 On average, the antigenic distance from the founding strain follows the trajectory indicated by the black LOESS spline fitted to viruses from all three regions.
 At any given point in time, strains above this line have drifted farther from the founder compared to average, and are thus considered antigenically leading.
 Conversely, strains below this line are considered antigenically lagging.
 Antigenic lead is calculated as the distance to the spline in antigenic units.
-(C) Prevalence of infection over time for each region. 
-(D) Depiction of the totally connected model population, composed of the temperate north, tropics, and temperate south.} 
+(\textit{c}) Prevalence of infection over time for each region. 
+(\textit{d}) Depiction of the totally connected model population, composed of the temperate north, tropics, and temperate south.} 
 \label{fig:example_run}
 \end{figure}
 
+The model reproduces the characteristic ecological and evolutionary features of H3N2, except for the antigenic lead (table \ref{tab:flu_metrics}), under the default parameters (table \ref{tab:default_parameters}). 
+We restricted our analyses to simulations where the virus remained endemic and where the time to the most recent common ancestor (TMRCA) never exceeded 10 years during the 40 years of simulation. 
+We chose this cutoff because in some simulations, the viral population developed unrealistically deep branches.
+In excluding extinctions and excessive diversity (branching), we assume that H3N2's historical evolutionary patterns represent the virus' likeliest evolutionary dynamics.
+Of 100 replicate simulations, the viral population went extinct in 18 cases and exceeded the TMRCA threshold 29 times, leaving 53 simulations for analysis.
+The model tracks the ancestry of individual strains, allowing us to explicitly reconstruct the phylogeny of the virus and the geographic location of lineages.
+The phylogeny has the characteristically well-defined trunk with short branches of the H3N2 hemagglutinin (figure~\ref{fig:example_run}). 
+This shape arises due repeated selective sweeps of antigenic variants, which reduces standing diversity; the average TMRCA across replicates was 3.72 years (SD = 0.26), comparable to empirical estimates of 3.89 years \cite{Bedford:2015fj}.
+The antigenic distance from the founder increased linearly with time (figure~\ref{fig:example_run}), characteristic of H3N2's canalized antigenic evolution \cite{Bedford:2012bx,Smith:2004jc}. 
+The mean antigenic drift across replicate simulations was 0.97 antigenic units per year (SD = 0.11), comparable to observed rates of 1.01 antigenic units per year \cite{Bedford:2014bf}. 
+The mean annual incidence was 9.1\% (SD = 0.8\%). 
+Reported annual incidence across all subtypes of seasonal influenza range from 9-15\% \cite{WHO:2014}.
+Since we only modeled one lineage (e.g., the H3N2 subtype), the low estimate from the model is comparable to observed incidence.
+
 Although all three host populations were the same size, the tropical strains were on average more evolutionarily successful. 
-The phylogenetic trunk traces the lineage of strains that survive to the end of the simulation---in other words, the most successful lineage---and was located in the tropics 77\% (SD = 13\%) of the time, comparable to the observed 87\% of the H3N2 phylogenetic trunk located in E-S-SE Asia \cite{Bedford:2015fj}. 
-Phenotypically, simulated strains were not more antigenically advanced in any particular population. 
-However, antigenic cartography shows that while H3N2 drifts on average at 1.01 antigenic units per year globally \cite{Bedford:2014bf}, Asian strains tend to be farther drifted at any given time, and the region is thus considered to lead antigenically \cite{Russell:2008ke, Bedford:2014bf}.
-Thus, the default parameterization does not capture the observed antigenic lead of Asian strains (Table \ref{tab:flu_metrics}).
+The phylogenetic trunk traces the most evolutionarily successful lineage and was located in the tropics 77\% (SD = 13\%) of the time, comparable to the observed 87\% of H3N2's trunk in E-S-SE Asia between 2000-2010 \cite{Bedford:2015fj}.
+However, the default parametrization does not produce an antigenic lead in any population, despite the observed antigenic lead of Asian strains (table \ref{tab:flu_metrics}).
+Antigenic cartography shows that while H3N2 drifts on average at 1.01 antigenic units per year globally \cite{Bedford:2014bf}, Asian strains tend to be farther drifted at any given time, and the region is thus considered to lead antigenically \cite{Russell:2008ke, Bedford:2014bf}.
 
 \begin{table}[h!]
+\centering
 \caption{Properties of the default model}
 \label{tab:flu_metrics}
 \begin{tabular}{@{\vrule height 10.5pt depth4pt  width0pt}lrr}
@@ -144,6 +159,7 @@ Tropics antigenic lead (a.u.)			&	0.0025$\pm$0.036 	& 0.25 \cite{Russell:2008ke,
 \end{table}
 
 \begin{table}[h!]
+\centering
 \caption{Default parameters}
 \label{tab:default_parameters}
 \begin{tabular}{@{\vrule height 10.5pt depth4pt  width0pt}lrcccc}
@@ -152,119 +168,133 @@ Parameter		&	Value	& Reference\\
 \hline
 Intrinsic reproductive number ($R_0$)	&	1.8		&	\cite{Jackson:2010hi, Biggerstaff:2014bu}\\
 Duration of infection $\nu$				&	5 days	&	\cite{Carrat:2008bk}\\
-Population size $N$					&	45 million	&	(see text) \\
+Population size $N$					&	45 million	&	(see ESM) \\
 Birth/death (turnover) rate $\gamma$	&	1/30 year$^{-1}$ & \cite{UN:2013} \\
-Mutation rate $\mu$					&	$10^{-4}$ $\text{day}^{-1}$ & (see text) \\
-Mean mutation step size $\delta_\text{mean}$	&	0.6 antigenic units & (see text) \\
-SD mutation step size $\delta_\text{sd}$		&	0.3 antigenic units & (see text) \\
-Infection risk conversion $s$			&	0.07		&	\cite{Bedford:2012bx, Gupta:2006bv, Park:2009jp}\\
-Migration rate $m$					&	$10^{-3}$ $\text{day}^{-1}$ & (see text) \\
+Mutation rate $\mu$					&	$10^{-4}$ $\text{day}^{-1}$ & (see ESM) \\
+Mean mutation step size $\delta_\text{mean}$	&	0.6 antigenic units & (see ESM) \\
+SD mutation step size $\delta_\text{sd}$		&	0.3 antigenic units & (see ESM) \\
+Infection risk conversion $c$			&	0.07		&	\cite{Bedford:2012bx, Gupta:2006bv, Park:2009jp}\\
+Migration rate $m$					&	$10^{-3}$ $\text{day}^{-1}$ & (see ESM) \\
 Seasonal amplitude $\epsilon$			&	0.10		&	\cite{Truscott:2012fh}
 \end{tabular}
 \end{table}
 
 \subsection{Seasonality}
-Seasonality by itself in the two temperate populations could not cause the tropics to produce more antigenically advanced strains; however, seasonality did cause the tropics to contribute a greater fraction of evolutionarily successful strains (Fig. \ref{fig:seasonality}). 
-The trunk spent 87\% of its time in the tropics (the same fraction that is observed in Asia \cite{Bedford:2015fj}) with a seasonal transmission amplitude ($\epsilon$) of 0.19 (95\% CI: 18\%, 20\%).
-In multivariate sensitivity analysis, the amplitude of seasonal transmission accounted for 33\% of the variation in the tropical fraction of the trunk (\textit{SI appendix}, Fig. \ref{fig:LHS_summary}, Table \ref{tab:LHS_ANOVA_trunk}). 
+We first varied the strength of seasonal forcing, holding other parameters at their default values.
+Seasonality by itself in the two temperate populations could not cause the tropics to produce more antigenically advanced strains; however, seasonality did cause the tropics to contribute a greater fraction of evolutionarily successful strains (figure \ref{fig:seasonality}). 
+By linear regression, we estimate that the trunk would spend 87\% of its time in the tropics (the same fraction that is observed in Asia \cite{Bedford:2015fj}) with a seasonal transmission amplitude ($\epsilon$) of 0.19 (95\% CI: 0.18, 0.20).
+Reduced seasonal forcing in the temperate populations equalized the fraction of the trunk in each population.
+In multivariate sensitivity analysis, the amplitude of seasonal transmission accounted for 33\% of the variation in the tropical fraction of the trunk (electronic supplementary material, figure \ref{fig:LHS_summary}, table \ref{tab:LHS_ANOVA_trunk}). 
 This result suggests that seasonal bottlenecks in temperate populations discourage seasonal strains from fixing globally, in agreement with other models \cite{Adams:2011dh}. 
-However, seasonality alone could not explain any variation in the tropic's antigenic lead (\textit{SI appendix}, Fig. \ref{fig:LHS_summary}, Table \ref{tab:LHS_ANOVA_agLead}).
+However, seasonality alone could not explain any variation in the tropic's antigenic lead (electronic supplementary material, figure \ref{fig:LHS_summary}, table \ref{tab:LHS_ANOVA_agLead}).
 We therefore hypothesized that ecological factors besides seasonality must contribute to regional differences in relative antigenic fitness.
 
 \subsection{Transmission rate in the tropics}
-Increasing $R_0$ in the tropics relative to the temperate populations caused the tropics to produce strains that led antigenically, while also preserving the tropics' contribution to the trunk (Fig. \ref{fig:relativeR0}).
-Our results predict that a 28\% increase in $R_0$ (95\% CI: 25\%, 30\%) in the tropics causes the tropics to produce strains that are, on average, 0.25 antigenic units ahead of global mean, in agreement with the observed antigenic lead in Asia \cite{Russell:2008ke,Bedford:2014bf}. 
-We also estimate that a 17\% increase in $R_0$ (95\% CI: 15\%,  19\%) causes the phylogenetic trunk to be located in the tropics 87\% of the time, reproducing the observed fraction of the H3N2 trunk in Asia \cite{Bedford:2015fj}. 
+Increasing $R_0$ in the tropics relative to the temperate populations caused the tropics to produce strains that led antigenically while also preserving the tropics' contribution to the trunk (figure \ref{fig:relativeR0}).
+Linear regression implies that a 28\% (95\% CI: 25\%, 30\%) increase in $R_0$ in the tropics causes the tropics to produce strains that are, on average, 0.25 antigenic units ahead of global mean, reproducing the observed antigenic lead in Asia \cite{Russell:2008ke,Bedford:2014bf}. 
+We also estimate that a 17\% increase in $R_0$ (95\% CI: 15\%,  19\%) causes the phylogenetic trunk to be located in the tropics 87\% of the time, reproducing the observed fraction of the H3N2 trunk in Asia \cite{Bedford:2015fj}.
 
-The effects of $R_0$ on antigenic lead were robust to changes in other ecological variables as well. 
-When we varied the other parameters (Table \ref{tab:default_parameters}), relative $R_0$ in the tropics accounted for 77\% of the variance in antigenic lead, making it the best predictor of antigenic lead in the tropics (\textit{SI appendix}, Fig. \ref{fig:LHS_summary}, Table \ref{tab:LHS_ANOVA_agLead}). 
-The fraction of the trunk in the tropics also increased with the relative $R_0$, although $R_0$ explained less of the variation in trunk proportion (41\%), due to the effect of seasonality (\textit{SI appendix}, Fig. \ref{fig:LHS_summary}, Table \ref{tab:LHS_ANOVA_trunk}).
-In the presence of strong seasonality in the temperate populations, even antigenically lagging strains from the tropics could form part of the trunk (\textit{SI appendix}, Fig. \ref{fig:LHS_summary}) because temperate strains sometimes failed to spread.
+The effects of $R_0$ on antigenic lead were robust to changes in other ecological variables and over a range of baseline values of global $R_0$.
+When we varied the other parameters (table \ref{tab:default_parameters}), relative $R_0$ in the tropics accounted for 77\% of the variance in antigenic lead, making it the best predictor of antigenic lead in the tropics (electronic supplementary material, figure \ref{fig:LHS_summary}, table \ref{tab:LHS_ANOVA_agLead}). 
+The fraction of the trunk in the tropics also increased with the relative $R_0$, although $R_0$ explained less of the variation in trunk proportion (41\%), due to the effect of seasonality (electronic supplementary material, figure \ref{fig:LHS_summary}, table \ref{tab:LHS_ANOVA_trunk}).
+
+Notably increased $R_0$ in one deme was sufficient by itself to make strains more evolutionarily successful and antigenically advanced. 
+When we removed seasonality altogether to model three climatically identical populations, the population with the highest $R_0$ produced both the most antigenically leading and evolutionarily successful strains (figure \ref{fig:seasonality_relativeR0}).
+Thus, higher $R_0$ alone in one region can cause it to attain an antigenic lead and fraction of the trunk as large as is observed in Asia.
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=3.42in]{./manuscript/figures/seasonality/seasonality.pdf}}
+\centerline{\includegraphics{manuscript/figures/seasonality/seasonality.pdf}}
 \caption{Seasonal amplitude $\epsilon$ in the temperate populations increases the tropics' contribution to the most evolutionarily successful lineage but alone does not affect regional differences in antigenic advancement. 
 Transmission rates $\beta$ in the temperate north and south oscillate sinusoidally in opposite phase, with amplitude $\epsilon$. 
-(A) Effects of seasonality on the fraction of the trunk in the tropics (Pearson's $r = 0.85$, $p < 0.001$; $R^2 = 0.72$). 
+All other parameters remain at their default values (table \ref{tab:default_parameters}).
+(\textit{a}) Effects of seasonality on the fraction of the trunk in the tropics (Pearson's $r = 0.85$, $p < 0.001$; $R^2 = 0.72$). 
 Each point shows the fraction of time that the phylogenetic trunk was located in the tropics during the course of one simulation. 
 The dashed line represents the null hypothesis where tropical strains comprise one third of the phylogenetic trunk. 
-(B) Effects on seasonality on the antigenic lead of the tropics (Pearson's $r = -0.12$, $p = 0.20$, $R^2 = 0.01$). 
+(\textit{b}) Effects on seasonality on the antigenic lead of the tropics (Pearson's $r = -0.12$, $p = 0.20$, $R^2 = 0.01$). 
 Each point shows the average antigenic lead of tropical strains over time from one simulation. 
 The dashed line represents the null hypothesis where tropical strains are neither antigenically ahead or behind. 
 Blue lines represent linear least squares regression.}
 \label{fig:seasonality}
 \end{figure}
 
-To better understand why increasing tropical $R_0$ causes the tropics to produce more antigenically advanced strains, we examined the effect of $R_0$ on antigenic evolution in a single deme.
-Simulations showed that increasing $R_0$ increases the rate of antigenic drift (\textit{SI appendix}, Fig. \ref{fig:R0_drift}).
-To investigate further, we derived an analytic expression for the invasion fitness of a novel mutant in a population at the endemic equilibrium (\textit{SI appendix}, Eq. S1).
-When the resident and mutant strains have the same intrinsic fitness ($R_0$), the growth rate of an antigenically distinct, invading mutant increases linearly with $R_0$ (\textit{SI appendix}, Fig. \ref{fig:R0_drift}).
-The strength of this relationship depends on the antigenic distance between the mutant phenotype and the phenotype of the resident strain, such that increases in $R_0$ have a greater effect on distant mutants compared to closer mutants.
+To better understand why increasing regional $R_0$ causes that region to produce more antigenically advanced strains, we examined the effect of $R_0$ on antigenic evolution in a single deme.
+Simulations showed that increasing $R_0$ increases the rate of antigenic drift (electronic supplementary material, figure \ref{fig:R0_drift}).
+To investigate further, we derived an analytic expression for the invasion fitness of a novel mutant in a population at the endemic equilibrium (electronic supplementary material, equation S1).
+When the resident and mutant strains have the same intrinsic fitness ($R_0$), the growth rate of an antigenically distinct, invading mutant increases linearly with $R_0$ (electronic supplementary material, figure \ref{fig:R0_selection}).
+This linearity holds as long as the conversion between antigenic distance and host susceptibility (equation \ref{eq:risk_conversion}) is independent of $R_0$.
+As $R_0$ increases, not only do mutants invade faster, but the invasion speed increases faster as a function of antigenic distance (electronic supplementary material, figure \ref{fig:R0_selection}).
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=3.42in]{./manuscript/figures/relativeR0/relativeR0.pdf}}
+\centerline{\includegraphics{manuscript/figures/relativeR0/relativeR0.pdf}}
 \caption{Increased $R_0$ in the tropics increases the tropics' contribution to the most evolutionarily successful lineage and the antigenic advancement of tropical strains. 
 Relative $R_0$ is calculated as $R_{0}$ in the tropics divided by $R_{0}$ in the temperate regions. 
-(\textit{A}) Effect of $R_0$ in the tropics on the fraction of the trunk in the tropics (Pearson's $r = 0.88$, $p < 0.001$; $R^2 = 0.78$). 
+$R_0$ in the tropics was varied while $R_0$ in the temperate regions was kept at its default.
+Other parameters were also kept at their default values (table \ref{tab:default_parameters}).
+(\textit{a}) Effect of $R_0$ in the tropics on the fraction of the trunk in the tropics (Pearson's $r = 0.88$, $p < 0.001$; $R^2 = 0.78$). 
 Each point shows the fraction of phylogenetic trunk located in the tropics during one simulation. 
 The dashed line represents the null hypothesis where tropical strains comprise one third of the phylogenetic trunk. 
-(B) Effect of $R_0$ in the tropics on the antigenic lead in the tropics (Pearson's $r = 0.93$, $p < 0.001$; $R^2 = 0.87$).
+(\textit{b}) Effect of $R_0$ in the tropics on the antigenic lead in the tropics (Pearson's $r = 0.93$, $p < 0.001$; $R^2 = 0.87$).
 Each point shows the average antigenic lead of tropical strains over time from one simulation.  
 The dashed line represents the null hypothesis where tropical strains are neither antigenically ahead or behind. 
 Blue lines represent linear least squares regression.}
 \label{fig:relativeR0}
 \end{figure}
 
-Although seasonality alone did not affect antigenic lead, the effects of $R_0$ on antigenic lead were influenced by seasonality (Fig. \ref{fig:seasonality_relativeR0}). 
+Although seasonality alone did not affect antigenic lead, the effects of $R_0$ on antigenic lead could be influenced by seasonality (figure \ref{fig:seasonality_relativeR0}).
 Introducing seasonality in the temperate populations reduced differences in antigenic phenotype between regions. 
 When tropical strains were antigenically ahead of temperate strains (due to higher tropical $R_0$), introducing seasonality reduced the tropics' antigenic lead. 
 When tropical strains were antigenically behind temperate strains (due to lower tropical $R_0$), introducing seasonality reduced the antigenic lag.
 Two factors explain the equalizing effect of seasonality on antigenic phenotype.
-First, high contact rates during temperate winters increase the rate of strain immigration from the tropics.
+First, higher contact rates during transmission peaks in the two temperate populations increase the rate of strain immigration from the tropics.
 Second, seasonal troughs in prevalence allow tropical strains to invade more easily due to reduced competition with local strains.
 
 \subsection{Demographic rates, population size, and initial conditions}
-Other ecological factors affected regional contributions to evolution but could not reproduce the observed patterns as well as differences in $R_0$ (\textit{SI appendix}, Figs.  \ref{fig:univariate_summary},  \ref{fig:LHS_summary}). 
-Notably, strains were slightly more antigenically advanced in older populations (Fig. \ref{fig:univariate_summary}). 
+Other ecological factors affected regional contributions to evolution but could not reproduce the observed patterns as well as differences in $R_0$ (electronic supplementary material, figures \ref{fig:univariate_summary}, \ref{fig:LHS_summary}). 
+Notably, strains were slightly more antigenically advanced in older populations (electronic supplementary material, figure \ref{fig:univariate_summary}). 
 When the rate of population turnover in the tropics was half that in the temperate regions, the tropics led by 0.04 antigenic units (SD = 0.03).
-Larger populations generally contributed more to the trunk, although there was much variation that population size alone did not explain (\textit{SI appendix}, Figs. \ref{fig:univariate_summary}, \ref{fig:LHS_summary} and Tables \ref{tab:LHS_ANOVA_agLead}, \ref{tab:LHS_ANOVA_trunk}). 
-Initial conditions did not have a lasting effect (\textit{SI appendix}, Fig. \ref{fig:I0_endYear}).
+Larger populations generally contributed more to the trunk, although there was much variation that population size alone did not explain (electronic supplementary material, figures \ref{fig:univariate_summary}, \ref{fig:LHS_summary} and table \ref{tab:LHS_ANOVA_trunk}, \ref{tab:LHS_ANOVA_agLead}). 
+Initial conditions did not have a lasting effect (electronic supplementary material, figure \ref{fig:I0_endYear}).
 
 \subsection{Implications for other influenza subtypes}
 Influenza A/H1N1 and influenza B both evolve slowly compared to H3N2 and are suspected to have lower $R_0$ \cite{Bedford:2015fj, Bedford:2014bf}. 
 Specifically, H1N1 drifts at a rate of 0.62 antigenic units per year, and the B/Victoria and Yamagata strains drift at 0.42 and 0.32 antigenic units per year respectively \cite{Bedford:2014bf}. 
 H1N1 and B viruses are also less apt to have Asian origins than H3N2 \cite{Bedford:2015fj}. 
-When we simulate with lower baseline $R_0$, we find that differences in $R_0$ between regions have a weaker influence on spatial patterns of evolution (\textit{SI appendix}, Fig. \ref{fig:R0_relativeR0}). 
-Based on the relationship between mean $R_0$ and antigenic drift (Fig. \ref{fig:R0_drift}), we would expect seasonal H1N1, for example, to have an $R_0$ of 1.6. 
+When we simulate with lower baseline $R_0$, we find that differences in $R_0$ between regions have a weaker influence on spatial patterns of evolution (electronic supplementary material, figure \ref{fig:R0_relativeR0}). 
+Based on the relationship between mean $R_0$ and antigenic drift (electronic supplementary material, figure \ref{fig:R0_drift}), we would expect seasonal H1N1, for example, to have an $R_0$ of 1.6. 
 For this $R_0$, a 17\% increase in $R_0$ causes the tropics to occupy only 79\% (versus 87\% for H3N2-like $R_0$ of 1.8) of the trunk, and a 28\% increase in $R_0$ causes the tropics to lead by 0.20 (versus 0.25 for H3N2) antigenic units.
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=3.42in]{./manuscript/figures/seasonality_relativeR0/seasonality_relativeR0.pdf}}
+\centerline{\includegraphics{manuscript/figures/seasonality_relativeR0/seasonality_relativeR0.pdf}}
 \caption{Seasonality in temperate populations has an equalizing effect on antigenic differences. 
 Relative $R_0$ is calculated as $R_0$ in the tropics divided by $R_0$ in the temperate regions. 
-(A) Effects of seasonality and $R_0$ on the fraction of the trunk in the tropics. 
+(\textit{a}) Effects of seasonality and $R_0$ on the fraction of the trunk in the tropics. 
 Blue indicates that the phylogenetic trunk is located in the tropics less than 1/3 of the time, and red indicates that the trunk is the tropics more than 1/3 of the time. 
-(B) Effects of seasonality and $R_0$ on antigenic lead in the tropics. Blue indicates that tropical strains are on average ahead antigenically relative to other global strains and red indicates that tropical strains are behind antigenically. 
+(\textit{b}) Effects of seasonality and $R_0$ on antigenic lead in the tropics. Blue indicates that tropical strains are on average ahead antigenically relative to other global strains and red indicates that tropical strains are behind antigenically. 
 Each square averages 1 to 17 replicate simulations.}
 \label{fig:seasonality_relativeR0}
 \end{figure}
 
 \section{Discussion} 
 
-We find that the simplest explanation for why a host population produces more antigenically novel and evolutionarily successful strains than other populations is that its strains have a higher intrinsic fitness, or $R_0$. 
+In our model, we find that the simplest explanation for why a host population produces more antigenically novel and evolutionarily successful strains than other populations is that its strains have a higher intrinsic fitness, or $R_0$. 
 The strong effect of regional $R_0$ on spatial patterns of viral evolution is caused by the effect of $R_0$ on antigenic drift. 
 Higher regional $R_0$ facilitates invasion of antigenically novel strains, resulting in faster antigenic drift.
 Seasonality reduces the rate at which temperate populations export strains that are evolutionarily successful, but seasonality alone cannot explain regional differences in the production of strains that are antigenically novel. 
 Size and age can influence global patterns too, but to a lesser extent: larger populations export more strains that fix, and populations with slower replenishment of susceptibles increase the rate of antigenic evolution. 
 These last two effects are sensitive to changes in seasonality and $R_0$. 
+These results highlight the relationship between human ecology and influenza's phylogeography.
+Regions with high transmission rates may be expected to contribute disproportionately to influenza's evolution and may also be ideal targets for vaccine campaigns.
+Accordingly, changes in human ecology can be expected to alter influenza's phylogeography.
+These generalizations assume that H3N2 will evolve mostly as it has, with high strain turnover and limited genetic variation at any time, but more complex dynamics may be possible.
 
-Our model uses a simple host population structure and minimal evolutionary landscape. 
-Although these simplifying assumptions limit our ability to replicate influenza's phylogeographic dynamics precisely, the model nonetheless reveals how ecological differences in populations create spatial patterns in the evolution of an influenza-like pathogen.
+To make general predictions, we used a simple model. 
+Although our three-deme metapopulation prevents us from replicating influenza's phylogeographic dynamics precisely, the model nonetheless reveals how ecological differences in populations create spatial patterns in the evolution of an influenza-like pathogen.
+Simulations with more complex metapopulation models showed the same trends as the simple three-deme model (figures \ref{fig:univariate_summary_5_deme}, \ref{fig:univariate_summary_6_deme}), suggesting that our results are robust to changes in metapopulation population structure.
 
 These results immediately raise the question of whether there is evidence of regional variation in $R_0$.
 Low reporting rates and antigenic evolution make the $R_0$ of influenza difficult to measure with traditional methods, but we can conjecture from several lines of evidence.
-Low absolute humidity favors transmission in experimental settings \cite{Shaman:2009gp} and also influences the timing of the influenza season in the United States \cite{Shaman:2010aa}. 
-Based on absolute humidity alone, these results suggest that $R_0$ of tropical and subtropical Asia would be lower than in temperate latitudes. 
+Low absolute humidity favors transmission via aerosol in experimental settings \cite{Shaman:2009gp} and influences the timing of the influenza season in the United States \cite{Shaman:2010aa}. 
+Based on absolute humidity and aerosol transmission alone, these results suggest that $R_0$ of tropical and subtropical Asia would be lower than in temperate latitudes. 
 However, in Vietnam the onset of influenza-like illness is associated with periods of high humidity \cite{Thai:2015fp}. 
 This observation suggests that humidity is not the dominant driver of influenza transmission, at least in this region.
 
@@ -281,12 +311,12 @@ The frequency of long-distance contacts differs between communities \cite{Read:2
 Although sensitivity of $R_0$ to network topology is well known theoretically \cite{Miller:2009kq, Adler:1992wu}, there is a need to integrate the features of local and regional empirical transmission networks to infer large-scale differences $R_0$.  
 
 Empirical estimates of $R_0$ are in theory attainable from seroprevalence.
-Under a simplistic, single-strain SIR model, which assumes random mixing and no maternal immunity, differences in $R_0$ should appear in differences in seropositivity by age.
+Under a simplistic, single-strain $SIR$ model, which assumes random mixing and no maternal immunity, differences in $R_0$ should appear in differences in seropositivity by age.
 For instance, if $R_0$=1.8, approximately 5.1\% of 2 year-olds would be seropositive, whereas 7.4\% would be seropositive if $R_0$ were 20\% higher.
 $R_0$ variation in this range could be detected by sampling as few as 1500 2 year-olds in each population. 
-Detailed surveys of H3N2 seropositivity by age cohort exist for some European countries \cite{Bodewes:2011fn, Sauerbrei:2009ic} but show much faster increases in seropositivity with age than expected under the SIR model: 100\% of tested children are seropositive to H3N2 by age 7 in the Netherlands and by age 12 in Germany.
-This discrepancy may be due to antigenic drift resulting in higher attack rates \cite{Bedford:2015fj}.
-The difference may also reflect greater contact rates among school-aged children \cite{Mossong:2008kk} and highlights the possibility that differences in exposure rates at young ages do not reflect mean differences in the populations. 
+Detailed surveys of H3N2 seropositivity by age cohort exist for some European countries \cite{Bodewes:2011fn, Sauerbrei:2009ic} but show much faster increases in seropositivity with age than expected under the $SIR$ model: 100\% of tested children are seropositive to H3N2 by age 7 in the Netherlands and by age 12 in Germany.
+This discrepancy between theory and data may be due to antigenic drift resulting in higher attack rates \cite{Bedford:2015fj}.
+The spatial difference in seroprevalence may also reflect greater contact rates among school-aged children \cite{Mossong:2008kk} and highlights the possibility that differences in exposure rates at young ages do not reflect mean differences in the populations. 
 Such effects may be reduced by examining seroprevalence at older ages, but these estimates must balance a tradeoff between minimizing age-related correlations in transmission rates and increasing sample sizes required to detect asymptotically small differences in seropositivity. 
 Another potential approach to measuring $R_0$ is to refine estimates of annual incidence in different populations.
 Estimates of $R_0$ based on annual incidence would have to incorporate the histories of recent circulating strains, survey timing and titer dynamics, and vaccination in each population.
@@ -296,37 +326,31 @@ Current birth rates across most of Europe, China, and the United States are with
 Birth rates are almost twice as high in some SE Asian countries, including Cambodia, Laos, and the Philippines. 
 The highest birth rates are found in Africa and the Middle East, and are three to four times higher than birth rates in the United States and China.
 Our model suggests that these regions should contribute relatively less to influenza's antigenic evolution, assuming the differences in population structure are not associated with higher $R_0$, and ignoring other differences. 
+However, taking age-assortative mixing into account may negate this expectation, with younger populations having increased $R_0$ \cite{Adler:1992wu, Dushoff:1995ht} thus contributing more to antigenic evolution.
 
 We expect these results to apply to other antigenically varying, fast-evolving pathogens, including other types of influenza. 
 Enterovirus-71 circulates globally, and its VP1 capsid protein experiences continuous lineage replacement through time, similarly to H3N2 hemagglutinin \cite{Tee:2010dia}.
 Norovirus also demonstrates rapid antigenic evolution by amino acid replacements in its capsid protein \cite{Lindesmith:2008en}. 
 We might expect that areas with high transmission contribute disproportionately to the antigenic evolution and global spread of these pathogens.
-In addition, when we simulate with lower $R_0$, we find that differences in $R_0$ between regions influence spatial patterns of antigenic variation less (\textit{SI appendix}, Fig. \ref{fig:R0_relativeR0}).
+In addition, when we simulate with lower $R_0$, we find that differences in $R_0$ between regions influence spatial patterns of antigenic variation less (electronic supplementary material, figure \ref{fig:R0_relativeR0}).
 This may explain why influenza A H1N1 and influenza B, which are suspected to have lower $R_0$ \cite{Bedford:2015fj, Bedford:2014bf}, are less apt to have Asian origins than H3N2 \cite{Bedford:2015fj}.
 
-\section{Acknowledgements}
-We thank Daniel Zinder, Maciej Boni, and Greg Dwyer for helpful discussion and Ed Baskerville for programming guidance. 
-This work was completed in part with resources provided by the University of Chicago Research Computing Center. 
-SC was supported by NIH grant DP2AI117921.
-FW was supported by NIH grant T32GM007281.
+\section{Material and methods}
 
-\section{Author contributions}
-TB and SC conceived the study. FW performed the analysis and wrote the first draft of the paper. All of the authors contributed to and approve the final version.
-
-\section{Materials and methods}
-\subsection{Description of the model}
 We implemented an individual-based $SIR$ compartmental model of an influenza-like pathogen, originally described by Bedford et al. \cite{Bedford:2012bx}. 
 In this model, a global metapopulation is composed of three connected populations, representing tropics and temperate north and south. 
 Individuals' compartments are updated using a $\tau$-leaping algorithm. 
 Within a region $i$, the force of infection is given by 
-\begin{equation*}
+
+\begin{equation}
 F_{i}(t) = \beta_i (t) \frac{I_i}{N_i}
-\end{equation*}
+\end{equation}
 where $I$ is the number of infected hosts. 
 Between regions $i$ and $j$, the force of infection is given by
-\begin{equation*}
+
+\begin{equation}
 F_{ij}(t) = m\beta_j (t) \frac{I_i}{N_j} 
-\end{equation*}
+\end{equation}
 where region $i$ is where the infection originates and region $j$ is the destination.
 Here, $m$ is a scaling factor for interregional transmission, and $\beta_j$ is the transmission rate of the destination region. 
 Transmission rates in the seasonal north and south oscillate sinusoidally in opposite phase with amplitude $\epsilon$. 
@@ -335,11 +359,13 @@ Hosts that clear infection accumulate an infection history that defines their im
 In a contact event, the distances between the infecting viral phenotype and each phenotype in the susceptible host's immune history are calculated. 
 The probability of infection after contact is proportional to the distance $d$ to the closest phenotype in the host's immune history. 
 An individual's risk of infection by such a strain is
-\begin{equation*}
-\text{Risk} = \min\left\{1,sd\right\}
-\end{equation*}
-where the proportionality constant for converting antigenic distance to a risk of infection $s=0.07$ \cite{Bedford:2012bx}; in other words, one unit of antigenic distance corresponds to 7\% reduction in immunity.
-The linear relationship $s$ between antigenic distance and susceptibility derives from studies of vaccine efficacy \cite{Bedford:2012bx, Gupta:2006bv, Park:2009jp}.
+
+\begin{equation}
+\text{Risk} = \min\left\{1,cd\right\}
+\label{eq:risk_conversion}
+\end{equation}
+where the proportionality constant for converting antigenic distance to a risk of infection $c=0.07$ \cite{Bedford:2012bx}; in other words, one unit of antigenic distance corresponds to 7\% reduction in immunity.
+The linear relationship $c$ between antigenic distance and susceptibility derives from studies of vaccine efficacy \cite{Bedford:2012bx, Gupta:2006bv, Park:2009jp}.
 
 Antigenic phenotypes are represented by points in a two-dimensional Euclidean antigenic space. 
 One unit of antigenic distance in this space corresponds to a twofold dilution of antiserum in an HI assay \cite{Smith:2004jc}. 
@@ -350,8 +376,386 @@ When a virus mutates, it moves in a random radial direction with a gamma-distrib
 This mutation rate, along with the mutation size parameters ($\delta_\text{mean}, \delta_\text{sd}$) determine the accessibility of more distant mutations in antigenic space. 
 The radial direction of mutation is chosen from a uniform distribution.
 
-\subsection{Selection of parameters}
-Parameter values were selected to be consistent with influenza's biology and to reproduce its major epidemiological and evolutionary patterns \ref{tab:default_parameters}.
+Additional methods are described in the electronic supplementary material. 
+
+\section{Data accessibility}
+Code implementing the model is available at \url{https://github.com/cobeylab/antigen-phylogeography.git}. 
+The complete code for reproducing these results is available at \url{https://github.com/cobeylab/influenza_phylogeography_manuscript.git}.
+
+\section{Competing interests}
+We have no competing interests.
+
+\section{Author contributions}
+TB and SC conceived the study. FW performed the analysis and wrote the first draft of the paper. All of the authors contributed to and approve the final version.
+
+\section{Acknowledgements}
+We thank Daniel Zinder, Maciej Boni, and Greg Dwyer for helpful discussion and Ed Baskerville for programming guidance. 
+This work was completed in part with resources provided by the University of Chicago Research Computing Center. 
+SC was supported by NIH grant DP2AI117921.
+FW was supported by NIH grant T32GM007281.
+
+\begin{thebibliography}{10}
+
+\bibitem{Shortridge:1982wo}
+Shortridge KF, Stuart-Harris CH.
+\newblock {An influenza epicentre?}
+\newblock The Lancet. 1982 Oct;320(8302):812--813.
+\newblock 
+  {(doi:10.1016/S0140-6736(82)92693-9)}
+
+\bibitem{Webster:1992wl}
+Webster RG, Bean WJ, Gorman OT, Chambers TM, Kawaoka Y.
+\newblock {Evolution and ecology of influenza A viruses}.
+\newblock Microbiological reviews. 1992;56(1):152--179.
+
+\bibitem{Cox:1994ui}
+Cox NJ, Brammer TL, Regnery HL.
+\newblock {Influenza: Global surveillance for epidemic and pandemic variants}.
+\newblock Eur J Epidemiol. 1994 Aug;10(4):467--470.
+\newblock {(doi:10.1007/bf01719678)}
+
+\bibitem{Cox:2000gq}
+Cox NJ, Subbarao K.
+\newblock {Global Epidemiology of Influenza: Past and Present}.
+\newblock Annual Review of Medicine. 2000 Feb;51(1):407--421.
+\newblock {(doi:10.1146/annurev.med.51.1.407)}
+
+\bibitem{FluNet}
+World Health Organization. FluNet, Global Influenza Surveillance and Response System (GISRS).
+www.who.int/flunet.
+
+\bibitem{Rambaut:2008ew}
+Rambaut A, Pybus OG, Nelson MI, Viboud C, Taubenberger JK, Holmes EC.
+\newblock {The genomic and epidemiological dynamics of human influenza A
+  virus}.
+\newblock Nature. 2008 Apr;453(7195):615--619.
+\newblock {(doi:10.1038/nature06945)}
+
+\bibitem{Russell:2008ke}
+Russell CA, Jones TC, Barr IG, Cox NJ, Garten RJ, Gregory V, et~al.
+\newblock {The Global Circulation of Seasonal Influenza A (H3N2) Viruses}.
+\newblock Science. 2008 Apr;320(5874):340--346.
+\newblock {(doi:10.1126/science.1154137)}
+
+\bibitem{Bahl:2011ep}
+Bahl J, Nelson MI, Chan KH, Chen R, Vijaykrishna D, Halpin RA, et~al.
+\newblock {Temporally structured metapopulation dynamics and persistence of
+  influenza A H3N2 virus in humans}.
+\newblock Proceedings of the National Academy of Sciences. 2011
+  Nov;108(48):19359--19364.
+\newblock {(doi:10.1073/pnas.1109314108)}
+
+\bibitem{Bedford:2010el}
+Bedford T, Cobey S, Beerli P, Pascual M.
+\newblock {Global Migration Dynamics Underlie Evolution and Persistence of
+  Human Influenza A (H3N2)}.
+\newblock {PLoS} Pathog. 2010 May;6(5):e1000918.
+\newblock {(doi:10.1371/journal.ppat.1000918)}
+
+\bibitem{Bedford:2015fj}
+Bedford T, Riley S, Barr IG, Broor S, Chadha M, Cox NJ, et~al.
+\newblock {Global circulation patterns of seasonal influenza viruses vary with
+  antigenic drift}.
+\newblock Nature. 2015 Jun;523(7559):217--220.
+\newblock {(doi:10.1038/nature14460)}
+
+\bibitem{Bedford:2014bf}
+Bedford T, Suchard MA, Lemey P, Dudas G, Gregory V, Hay AJ, et~al.
+\newblock {Integrating influenza antigenic dynamics with molecular evolution}.
+\newblock {eLife}. 2014 Feb;3.
+\newblock {(doi:10.7554/eLife.01914)}
+
+\bibitem{Viboud:2006ge}
+Viboud C, Alonso WJ, Simonsen L.
+\newblock {Influenza in Tropical Regions}.
+\newblock {PLoS} Med. 2006 Mar;3(4):e89.
+\newblock {(doi:10.1371/journal.pmed.0030089)}
+
+\bibitem{GPWv3}
+{Gridded Population of the World, Version 3 (GPWv3): Population Count Grid}.
+\newblock Palisades, NY: NASA Socioeconomic Data and Applications Center
+  (SEDAC); 2005.
+\newblock {(doi:10.7927/H4639MPP)}
+
+\bibitem{Cheng:2013hb}
+Cheng X, Tan Y, He M, Lam TTY, Lu X, Viboud C, et~al.
+\newblock {Epidemiological dynamics and phylogeography of influenza virus in
+  southern China}.
+\newblock Journal of Infectious Diseases. 2012 Aug;207(1):106--114.
+\newblock {(doi:10.1093/infdis/jis526)}
+
+\bibitem{Adams:2011dh}
+Adams B, McHardy AC.
+\newblock {The impact of seasonal and year-round transmission regimes on the
+  evolution of influenza A virus}.
+\newblock Proceedings of the Royal Society B: Biological Sciences. 2010
+  Dec;278(1716):2249--2256.
+\newblock {(doi:10.1098/rspb.2010.2191)}
+
+\bibitem{Zinder:2014jx}
+Zinder D, Bedford T, Baskerville EB, Woods RJ, Roy M, Pascual M.
+\newblock {Seasonality in the migration and establishment of H3N2 Influenza
+  lineages with epidemic growth and decline}.
+\newblock {BMC} Evol Biol. 2014 Dec;14(1).
+\newblock {(doi:10.1186/s12862-014-0272-2)}
+
+\bibitem{Chan:2010fu}
+Chan J, Holmes A, Rabadan R.
+\newblock {Network analysis of global influenza spread}.
+\newblock {PLoS Comput Biol}. 2010 Nov;6(11):e1001005.
+\newblock {(doi:10.1371/journal.pcbi.1001005)}
+
+\bibitem{Lemey:2014ez}
+Lemey P, Rambaut A, Bedford T, Faria N, Bielejec F, Baele G, et~al.
+\newblock {Unifying Viral Genetics and Human Transportation Data to Predict the
+  Global Transmission Dynamics of Human Influenza H3N2}.
+\newblock {PLoS Pathog}. 2014 Feb;10(2):e1003932.
+\newblock {(doi:10.1371/journal.ppat.1003932)}
+
+\bibitem{UN:2013}
+{World Population Prospects: The 2012 Revision}.
+\newblock New York; 2013.
+
+\bibitem{Grenfell:2004ho}
+Grenfell BT.
+\newblock {Unifying the epidemiological and evolutionary dynamics of
+  pathogens}.
+\newblock Science. 2004 Jan;303(5656):327--332.
+\newblock {(doi:10.1126/science.1090727)}
+
+\bibitem{Lin:2003ht}
+Lin J, Andreasen V, Casagrandi R, Levin SA.
+\newblock {Traveling waves in a model of influenza A drift}.
+\newblock Journal of Theoretical Biology. 2003 Jun;222(4):437--445.
+\newblock 
+  {(doi:10.1016/S0022-5193(03)00056-0)}
+
+\bibitem{Gog:2002bi}
+Gog JR, Grenfell BT.
+\newblock {Dynamics and selection of many-strain pathogens}.
+\newblock Proceedings of the National Academy of Sciences. 2002
+  Dec;99(26):17209--17214.
+\newblock {(doi:10.1073/pnas.252512799)}
+
+\bibitem{Kucharski:2012ez}
+Kucharski A, Gog JR.
+\newblock {Influenza emergence in the face of evolutionary constraints}.
+\newblock Proceedings of the Royal Society B: Biological Sciences. 2011
+  Jul;279(1729):645--652.
+\newblock {(doi:10.1098/rspb.2011.1168)}
+
+\bibitem{Smith:2004jc}
+Smith DJ.
+\newblock {Mapping the antigenic and genetic evolution of influenza virus}.
+\newblock Science. 2004 Jul;305(5682):371--376.
+\newblock {(doi:10.1126/science.1097211)}
+
+\bibitem{Bedford:2012bx}
+Bedford T, Rambaut A, Pascual M.
+\newblock {Canalization of the evolutionary trajectory of the human influenza
+  virus}.
+\newblock {BMC} Biology. 2012;10(1):38.
+\newblock {(doi:10.1186/1741-7007-10-38)}
+
+\bibitem{WHO:2014}
+World Health Organization.
+Influenza Fact Sheet; 2014.
+
+\bibitem{Jackson:2010hi}
+Jackson C, Vynnycky E, Mangtani P.
+\newblock {Estimates of the transmissibility of the 1968 (Hong Kong) influenza
+  pandemic: evidence of increased transmissibility between successive waves}.
+\newblock American Journal of Epidemiology. 2009 Dec;171(4):465--478.
+\newblock {(doi:10.1093/aje/kwp394)}
+
+\bibitem{Biggerstaff:2014bu}
+Biggerstaff M, Cauchemez S, Reed C, Gambhir M, Finelli L.
+\newblock {Estimates of the reproduction number for seasonal, pandemic, and
+  zoonotic influenza: a systematic review of the literature}.
+\newblock {BMC} Infect Dis. 2014;14(1):480.
+\newblock {(doi:10.1186/1471-2334-14-480)}
+
+\bibitem{Carrat:2008bk}
+Carrat F, Vergu E, Ferguson NM, Lemaitre M, Cauchemez S, Leach S, et~al.
+\newblock {Time lines of infection and disease in human influenza: a review of
+  volunteer challenge studies}.
+\newblock American Journal of Epidemiology. 2008 Mar;167(7):775--785.
+\newblock {(doi:10.1093/aje/kwm375)}
+
+\bibitem{Gupta:2006bv}
+Gupta V, Earl DJ, Deem MW.
+\newblock {Quantifying influenza vaccine efficacy and antigenic distance}.
+\newblock Vaccine. 2006 May;24(18):3881--3888.
+\newblock 
+  {(doi:10.1016/j.vaccine.2006.01.010)}
+
+\bibitem{Park:2009jp}
+Park AW, Daly JM, Lewis NS, Smith DJ, Wood JLN, Grenfell BT.
+\newblock {Quantifying the impact of immune escape on transmission dynamics of
+  influenza}.
+\newblock Science. 2009 Oct;326(5953):726--728.
+\newblock {(doi:10.1126/science.1175980)}
+
+\bibitem{Truscott:2012fh}
+Truscott J, Fraser C, Cauchemez S, Meeyai A, Hinsley W, Donnelly CA, et~al.
+\newblock {Essential epidemiological mechanisms underpinning the transmission
+  dynamics of seasonal influenza}.
+\newblock Journal of The Royal Society Interface. 2011 Jun;9(67):304--312.
+\newblock {(doi:10.1098/rsif.2011.0309)}
+
+\bibitem{Shaman:2009gp}
+Shaman J, Kohn M.
+\newblock {Absolute humidity modulates influenza survival, transmission, and
+  seasonality}.
+\newblock Proceedings of the National Academy of Sciences. 2009
+  Feb;106(9):3243--3248.
+\newblock {(doi:10.1073/pnas.0806852106)}
+
+\bibitem{Shaman:2010aa}
+Shaman J, Pitzer VE, Viboud C, Grenfell BT, Lipsitch M.
+\newblock {Absolute Humidity and the Seasonal Onset of Influenza in the
+  Continental United States}.
+\newblock {PLoS} Biology. 2010 Feb;8(2):e1000316.
+\newblock {(doi:10.1371/journal.pbio.1000316)}
+
+\bibitem{Thai:2015fp}
+Thai PQ, Choisy M, Duong TN, Thiem VD, Yen NT, Hien NT, et~al.
+\newblock {Seasonality of absolute humidity explains seasonality of
+  influenza-like illness in Vietnam}.
+\newblock Epidemics. 2015 Dec;13:65--73.
+\newblock {(doi:10.1016/j.epidem.2015.06.002)}
+
+\bibitem{Wallinga:2006ct}
+Wallinga J, Teunis P, Kretzschmar M.
+\newblock {Using data on social contacts to estimate age-specific transmission
+  parameters for respiratory-spread infectious agents}.
+\newblock American Journal of Epidemiology. 2006 Sep;164(10):936--944.
+\newblock {(doi:10.1093/aje/kwj317)}
+
+\bibitem{Cauchemez:2008cq}
+Cauchemez S, Valleron AJ, Boëlle PY, Flahault A, Ferguson NM.
+\newblock {Estimating the impact of school closure on influenza transmission
+  from Sentinel data}.
+\newblock Nature. 2008 Apr;452(7188):750--754.
+\newblock {(doi:10.1038/nature06732)}
+
+\bibitem{Heymann:2004wy}
+Heymann A, Chodick G, Reichman B, Kokia E, Laufer J.
+\newblock {Influence of school closure on the incidence of viral respiratory
+  diseases among children and on health care utilization}.
+\newblock The Pediatric infectious disease journal. 2004;23(7):675--677.
+
+\bibitem{Chao:2010fo}
+Chao DL, Halloran ME, Ira~M~Longini J.
+\newblock {School opening dates predict pandemic influenza A(H1N1) outbreaks in
+  the United States}.
+\newblock The Journal of Infectious Diseases. 2010 Sep;202(6):877--880.
+\newblock {(doi:10.1086/655810)}
+
+\bibitem{Cowling:2008bn}
+Cowling BJ, Lau EHY, Lam CLH, Cheng CKY, Kovar J, Chan KH, et~al.
+\newblock {Effects of school closures, 2008 winter influenza season, Hong
+  Kong}.
+\newblock Emerg Infect Dis. 2008 Oct;14(10):1660--1662.
+\newblock {(doi:10.3201/eid1410.080646)}
+
+\bibitem{Tsang:2015kb}
+Tsang TK, Lau LLH, Cauchemez S, Cowling BJ.
+\newblock {Household transmission of influenza virus}.
+\newblock Trends in Microbiology. 2016 Feb;24(2):123--133.
+\newblock {(doi:10.1016/j.tim.2015.10.012)}
+
+\bibitem{UNSD:2011}
+UNSD Demographic Statistics.
+\newblock New York; 2016.
+
+\bibitem{OECD:2015}
+OECD. Education at a Glance 2015, OECD Indicators; 2015.
+
+\bibitem{Read:2014kk}
+Read JM, Lessler J, Riley S, Wang S, Tan LJ, Kwok KO, et~al.
+\newblock {Social mixing patterns in rural and urban areas of southern China}.
+\newblock Proceedings of the Royal Society B: Biological Sciences. 2014
+  Apr;281(1785):20140268--20140268.
+\newblock {(doi:10.1098/rspb.2014.0268)}
+
+\bibitem{Mossong:2008kk}
+Mossong J, Hens N, Jit M, Beutels P, Auranen K, Mikolajczyk R, et~al.
+\newblock {Social contacts and mixing patterns relevant to the spread of
+  infectious diseases}.
+\newblock {PLoS} Med. 2008 Mar;5(3):e74.
+\newblock {(doi:10.1371/journal.pmed.0050074)}
+
+\bibitem{Horby:2011eh}
+Horby P, Thai PQ, Hens N, Yen NTT, Mai LQ, Thoang DD, et~al.
+\newblock {Social contact patterns in Vietnam and implications for the control
+  of infectious diseases}.
+\newblock {PLoS One}. 2011 Feb;6(2):e16965.
+\newblock {(doi:10.1371/journal.pone.0016965)}
+
+\bibitem{Miller:2009kq}
+Miller JC.
+\newblock {Spread of infectious disease through clustered populations}.
+\newblock Journal of The Royal Society Interface. 2009 Mar;6(41):1121--1134.
+\newblock {(doi:10.1098/rsif.2008.0524)}
+
+\bibitem{Adler:1992wu}
+Adler FR.
+\newblock {The effects of averaging on the basic reproduction ratio}.
+\newblock Mathematical Biosciences. 1992 Sep;111(1):89--98.
+\newblock {(doi:10.1016/0025-5564(92)90080-G)}
+
+\bibitem{Bodewes:2011fn}
+Bodewes R, de~Mutsert G, van~der Klis FRM, Ventresca M, Wilks S, Smith DJ,
+  et~al.
+\newblock {Prevalence of antibodies against seasonal influenza A and B viruses
+  in children in Netherlands}.
+\newblock Clinical and Vaccine Immunology. 2011 Jan;18(3):469--476.
+\newblock {(doi:10.1128/CVI.00396-10)}
+
+\bibitem{Sauerbrei:2009ic}
+Sauerbrei A, Schmidt-Ott R, Hoyer H, Wutzler P.
+\newblock {Seroprevalence of influenza A and B in German infants and
+  adolescents}.
+\newblock Med Microbiol Immunol. 2009 Feb;198(2):93--101.
+\newblock {(doi:10.1007/s00430-009-0108-7)}
+
+\bibitem{Dushoff:1995ht}
+Dushoff J, Levin S.
+\newblock {The effects of population heterogeneity on disease invasion}.
+\newblock Mathematical Biosciences. 1995 Jul;128(1-2):25--40.
+\newblock {(doi:10.1016/0025-5564(94)00065-8)}
+
+\bibitem{Tee:2010dia}
+Tee KK, Lam TTY, Chan YF, Bible JM, Kamarulzaman A, Tong CYW, et~al.
+\newblock {Evolutionary genetics of human enterovirus 71: origin, population
+  dynamics, natural selection, and seasonal periodicity of the VP1 gene}.
+\newblock Journal of Virology. 2010 Jan;84(7):3339--3350.
+\newblock {(doi:10.1128/JVI.01019-09)}
+
+\bibitem{Lindesmith:2008en}
+Lindesmith LC, Donaldson EF, LoBue AD, Cannon JL, Zheng DP, Vinje J, et~al.
+\newblock {Mechanisms of GII.4 norovirus persistence in human populations}.
+\newblock {PLoS} Med. 2008 Feb;5(2):e31.
+\newblock {(doi:10.1371/journal.pmed.0050031)}
+
+\bibitem{ICAO:2014}
+International Civil Aviation Organization.
+\newblock {\em Annual report of the ICAO council: 2014}, 2014.
+
+\end{thebibliography}
+
+\makeatletter
+\renewcommand*\thefigure{S\arabic{figure}}
+\renewcommand*\thetable{S\arabic{table}}
+\makeatother
+\setcounter{figure}{0}
+\setcounter{table}{0}
+
+\section{Electronic Supplementary Material}
+\subsection{Extended methods}
+\subsubsection{Selection of parameters}
+Parameter values were selected to be consistent with influenza's biology and to reproduce its major epidemiological and evolutionary patterns (table 1).
 The population size $N$ was chosen to minimize extinctions while also making efficient use of computational resources.
 The population birth/death rate $\gamma$ = 1/30 year$^{-1}$ reflects the global crude birth rate estimates of 34 births per 1000 \cite{UN:2013}.
 
@@ -362,54 +766,55 @@ Estimates of $R_0$ from the first pandemic wave H3N2 in 1968 range from 1.06-2.0
 
 The five-day duration of infection, $1/\nu$, is based on estimates from viral shedding \cite{Carrat:2008bk}. 
 The transmission rate, $\beta$, is calculated using the definition of $R_0$:
+
 \begin{equation*}
 R_0 = \frac{\beta}{\nu + \gamma}
 \end{equation*}
 We chose the seasonal amplitude to ensure consistent troughs during the off-season in temperate populations while remaining within reasonable estimates of seasonal transmission rates \cite{Truscott:2012fh}.
 
+Mutational parameters were selected to maximize the number of simulations where evolution was influenza-like (figure \ref{fig:sensitivity_analysis}).
 Mutations occur at a rate of $10^{-4}$ mutations per day.
+This phenotypic mutation rate corresponds to 10 antigenic sites mutating at $10^{-5}$ mutations per day \cite{Rambaut:2008ew, Bedford:2012bx}.
 The distance of each mutation is sampled from a gamma distribution with parameters chosen to yield a mean step size of 0.6 and a standard deviation of 0.3 antigenic units. 
 These values correspond to a reduction in immunity of 4.2\% for an average mutation (SD = 2.1\%).
 These mutation effect parameters give the gamma distribution an exponential-like shape, so that most mutations yield small differences in antigenic fitness, while occasionally mutations will yield greater differences. 
-We chose $\mu$, $\delta_\text{mean}$, and $\delta_\text{sd}$ so that the simulation would exhibit influenza-like behavior as consistently as possible (Fig. \ref{fig:sensitivity_analysis}).
+We chose $\mu$, $\delta_\text{mean}$, and $\delta_\text{sd}$ so that the simulations would exhibit influenza-like behaviour as consistently as possible (figure \ref{fig:sensitivity_analysis}).
+Here, the criteria for influenza-like behavior included endemism, reduced genealogical diversity (TMRCA $<$ 10 years) \cite{Bedford:2015fj}, and a biologically plausible mean rate of antigenic drift (1.01 antigenic units per year) \cite{Bedford:2014bf} and incidence (9-15\%) \cite{WHO:2014} (table 1, figure \ref{fig:sensitivity_analysis}).
 
-\subsection{Calculation of antigenic lead and trunk proportion}
+\subsubsection{Calculation of antigenic lead and trunk proportion}
 We examined two metrics that describe influenza's evolutionary dynamics.
-For computational tractibility, these metrics were calculated using a subset of strains sampled over course of the simulation.
+For computational tractability, these metrics were calculated using a subset of strains sampled over course of the simulation.
 Strains were sampled proportionally to prevalence.
 
-To calculate antigenic lead, we first calculated the antigenic distance of each sampled strain from the founding strain (Fig. \ref{fig:example_run}A).
+To calculate antigenic lead, we first calculated the antigenic distance of each sampled strain from the founding strain (figure 1\textit{a}).
 We then fit a LOESS spline to these distances over time.
 The spline describes the expected antigenic drift of circulating lineages at any point in time.
 Strains above the spline have drifted farther than average and are considered antigenically leading.
 Strains below the spline have drifted less than average and are considered antigenically lagging.
 The antigenic lead in the tropics is calculated as the average antigenic distance to this spline for all sampled tropical strains.
 
-To calculate the fraction of the trunk in each population, we first identified strains that comprise the trunk by tracing the lineage of strains that survive to the end of the simulation (Fig. \ref{fig:example_run}B). 
-Because multiple lineages may coexist at the end of the simulation, we excluded the last 5 years of strains from trunk calculations.
+To calculate the fraction of the trunk in each population, we first identified strains that comprise the trunk by tracing the lineage of strains that survive to the end of the simulation (figure 1\textit{b}). 
+Because multiple lineages may coexist at the end of the simulation, we excluded the last five years of strains from trunk calculations.
 The fraction of the trunk in the tropics is calculated as the fraction of the time the trunk was composed of tropical strains.
 
-\subsection{Multivariate sensitivity analysis}
-To test the robustness of the effects of individual parameters on the antigenic lead and the phylogenetic trunk, we simulated 500 points from a Latin hypercube with dimensions representing relative $R_0$, seasonality, relative population size, relative population turnover rate, and the fraction of initial infecteds in the tropics (Fig. \ref{fig:LHS_summary}). 
-The ranges for each parameter (Table \ref{tab:LHS_parameters}) were chosen to remain within reasonable estimates. 
+\subsubsection{Univariate sensitivity analysis}
+In the univariate sensitivity analyses, we created regional differences in host ecology by varying each of the five ecological parameters individually ($R_0$, population turnover rate, seasonality, population size, and initial conditions) while keeping all other parameters at their default values (table 2).
+To test the effects of regional $R_0$, we changed $R_0$ only in the tropics.
+Similarly, we tested the effects of the rate of population turnover by varying it only in the tropics.
+To investigate seasonality, we varied the seasonal amplitude of the transmission rate in the temperate populations.
+(The transmission rate in the tropics was always constant over time.)
+To explore population size, we examined the ratio of tropical to temperate population sizes, keeping the global population constant.
+We initialized all simulations at the endemic equilibrium such that the total number of initial infecteds was constant.
+We then scaled the number of initial infecteds in the tropics while keeping the number in the two temperate demes the same.
+We ran twenty replicates for each unique combination of parameter values and discarded any simulations in which the virus went extinct or the TMRCA exceeded 10 years at any time in the 40-year simulation.
+The analyses for antigenic lead and trunk proportion were performed on the remaining simulations (figure \ref{fig:univariate_summary}).
+
+\subsubsection{Multivariate sensitivity analysis}
+To test the robustness of the effects of individual parameters on the antigenic lead and the phylogenetic trunk, we simulated 500 points from a Latin hypercube with dimensions representing relative $R_0$, seasonality, relative population size, relative population turnover rate, and the fraction of initial infecteds in the tropics (figure \ref{fig:LHS_summary}). 
+The ranges for each parameter (table \ref{tab:LHS_parameters}) were chosen to remain within reasonable estimates. 
 We simulated twenty replicates for each of the 500 unique parameter combination and discarded simulations in which the virus went extinct or the TMRCA exceeded 10 years at any time in the 40-year simulation.
-We performed an ANOVA on the remaining 4119 influenza-like simulations to determine each parameter's contribution to the variance in antigenic lead and the fraction of the trunk in the tropics (Table \ref{tab:LHS_ANOVA_agLead}, \ref{tab:LHS_ANOVA_trunk}).
+We performed an ANOVA on the remaining 4119 influenza-like simulations to determine each parameter's contribution to the variance in antigenic lead and the fraction of the trunk in the tropics (table \ref{tab:LHS_ANOVA_trunk}, \ref{tab:LHS_ANOVA_agLead}).
 
-\subsection{Data accessibility}
-Code implementing the model is available at \url{https://github.com/cobeylab/antigen-phylogeography.git}. 
-The complete code for reproducing these results is available at \url{https://github.com/cobeylab/influenza_phylogeography_manuscript.git}.
-
-\bibliography{influenza_phylogeography_ms}
-
-\makeatletter
-\renewcommand*\thefigure{S\arabic{figure}}
-\renewcommand*\thetable{S\arabic{table}}
-\makeatother
-\setcounter{figure}{0}
-\setcounter{table}{0}
-
-\newpage
-\section{Supporting Information}
 \setlength{\parindent}{0cm}
 \subsection{Invasion analysis}
 We assume that the host population supports a resident strain at the endemic equilibrium. 
@@ -431,8 +836,10 @@ We solve for the endemic equilibrium values of $S_\text{eq}$, $I_\text{eq}$, $R_
 \frac{dI}{dt}=  0 &=\beta S_\text{eq} I_\text{eq} - (\nu + \gamma) I_\text{eq}\\
 S_\text{eq} &= \frac{\nu + \gamma}{\beta} \equiv \frac{1}{R_0}
 \end{align*}
+
 $R_0$, the basic reproductive number, is defined as the number of secondary infections from a single infected individual in a totally susceptible population. 
 Continuing to solve for $I_\text{eq}$ and $R_\text{eq}$, we have
+
 \begin{align*}
 \frac{dS}{dt}=  0 &=\gamma (1-  S_\text{eq} ) -\beta S_\text{eq} I_\text{eq} \\
 I_\text{eq}&=\frac{\gamma}{\beta}(R_0-1)\\
@@ -443,20 +850,21 @@ R_\text{eq}&=\frac{\nu}{\beta}(R_0-1)
 To find the selection coefficient, we develop an expression for the effective reproductive number $R_e$ for both the resident and mutant strains. 
 $R_e$ is the expected number of secondary infections from a single infected individual in a given population.
 We will use the relationship
+
 \begin{align*}
 R_e &= SR_0
 \end{align*}
 
 The mutant strain is $d$ antigenic units from the resident strain. 
-The conversion factor between antigenic units and infection risk is notated by $s$. 
-Thus, the susceptibility to the mutant is given by $\min\{sd,1\}$, and immunity to the mutant is $\max\{1-sd,0\}$. 
-For ease of notation, we assume $sd \le 1$, and use $k = 1-sd$
+The conversion factor between antigenic units and infection risk is notated by $c$. 
+Thus, the susceptibility to the mutant is given by $\min\{cd,1\}$, and immunity to the mutant is $\max\{1-cd,0\}$. 
+For ease of notation, we assume $cd \le 1$, and use $k = 1-cd$.
 
 The fraction of the population immune to the invading strain is denoted by $R'$. 
 Note that the population is at the endemic equilibrium of the resident strain, and not the mutant.
 
 \begin{align*}
-R' &= (1-sd)R_\text{eq}\\
+R' &= (1-cd)R_\text{eq}\\
 &= \frac{\nu}{\beta}(R_0-1)k
 \end{align*}
 
@@ -466,7 +874,9 @@ We start by allowing coinfection. The fraction of susceptibles to the mutant str
 S' &= 1-R' - \frac{1}{N}\\
 &= 1- \frac{\nu k }{\beta}(R_0-1) - \frac{1}{N}\\
 \end{align*}
+
 For large $N$, we have
+
 \begin{align*}
 S' &= 1- \frac{\nu k }{\beta}(R_0-1)\\
 \end{align*}
@@ -492,8 +902,9 @@ s &= (\nu +\gamma)R_0 - \nu k (R_0-1) - (\nu+\gamma)\\
 \end{align*}
 
 Simplifying,
+
 \begin{align}\tag{S1}
-s&= (\nu sd + \gamma)(R_0 -1 ) 
+s&= (\nu cd + \gamma)(R_0 -1 ) 
 \end{align}
 
 Now disallowing coinfection, we have 
@@ -502,7 +913,9 @@ Now disallowing coinfection, we have
 S' &= 1-R'-I_\text{eq}-I'\\
 &= 1- \frac{\nu}{\beta}(R_0-1)k - \frac{\gamma}{\beta}(R_0-1) - \frac{1}{N}
 \end{align*}
+
 For large $N$,
+
 \begin{align*}
 S' &=1 - (R_0-1)[\frac{\nu k + \gamma}{\beta}] 
 \end{align*}
@@ -516,40 +929,51 @@ s &= \beta-(\nu k + \gamma)(R_0-1) - \frac{\beta}{R_0}\\
 Simplifying,
 
 \begin{align}\tag{S2}
-s&=(\nu sd)(R_0-1)
+s&=(\nu cd)(R_0-1)
 \end{align}
 
 In summary, the selection coefficient of an invading mutant strain increases linearly with the $R_0$, which is shared by both strains. 
-The slope of this relationship is proportional to the distance $d$ between the two strains in antigenic space (Fig. \ref{R0_selection}).
+The slope of this relationship is proportional to the distance $d$ between the two strains in antigenic space (figure \ref{fig:R0_selection}).
+Naturally, relationship between the selection coefficient on the distance $d$ between strains depends on the functional relationship between antigenic distance and immunity.
+However, the linear dependence of the selection coefficient on $R_0$ holds as long as the functional relationship between antigenic distance and immunity is independent of $R_0$. 
 
 \subsection{Detecting differences in $R_0$}
 
-In the SIR model, the force of infection is
+In the $SIR$ model, the force of infection is
+
 \begin{align*}
 F = \beta I
 \end{align*}
+
 where $\beta$ is the transmission rate and $I$ is the fraction of infecteds. 
 At the endemic equilibrium, the cumulative fraction of seropositive individuals at a given age $a$ is
+
 \begin{align*}
 f(a) &= 1-\exp(-\beta I_\text{eq} a)\\
 &= 1-\exp(-R_0 (\nu + \gamma I_{\text{eq}} a)
 \end{align*}
+
 where $\nu$ is the recovery rate and $\gamma$ is the birth/death rate.
 $I_{\text{eq}}$, the fraction of infecteds at the endemic equilibrium, is given by
+
 \begin{align*}
  I_{\text{eq}} = \frac{\gamma}{\beta}(R_0-1)
 \end{align*}
-Figure \ref{SIR_seropositivity} shows the fraction of seropositive individuals by age for the baseline $R_0=1.8$ and a 20\% higher $R_0=2.16$. 
+
+Figure \ref{fig:SIR_seropositivity} shows the fraction of seropositive individuals by age for the baseline $R_0=1.8$ and a 20\% higher $R_0=2.16$. 
 The difference in the percentage of seropositive two-year-olds between the two groups is approximately 2.3\%.
 The sample size in each group required to detect a difference $f_2(a) - f_1(a)$ with $\alpha$ confidence and $1-\beta$ power is
+
 \begin{align*}
 N =\frac{ f_1 (1-f_1) + f_2(1-f_2)}{(f_1 - f_2)^2} (\Phi_{\alpha/2} + \Phi_{\beta})^2
 \end{align*}
+
 For legibility, $f_i(a)$ is written as $f_i$. 
 To detect a 20\% difference in $R_0$ between two populations with 0.05 significance and 0.80 power, we would require a sample of at least 1503 individuals in both groups.
 
 \section{Supplemental tables and figures}
 \begin{table*}[h!]
+\centering
 \caption{Parameter ranges used in Latin hypercube sampling}
 \label{tab:LHS_parameters}
 \begin{tabular}{@{\vrule height 10.5pt depth4pt width0pt}lrcccc}
@@ -566,6 +990,7 @@ Fraction of initial infecteds ($I_0$) in tropics		&	0.0$-$1.0\\
 \end{table*}
 
 \begin{table*}[h!]
+\centering
 \caption{ANOVA of the fraction of trunk in tropics from multivariate sensitivity analysis}
 \label{tab:LHS_ANOVA_trunk}
 \begin{tabular}{@{\vrule height 10.5pt depth4pt  width0pt}lrrrrrr}
@@ -584,6 +1009,7 @@ Fraction of initial infecteds ($I_0$) in tropics		&	0.0$-$1.0\\
 \end{table*}
 
 \begin{table*}[h!]
+\centering
 \caption{ANOVA of the tropics' antigenic lead from multivariate sensitivity analysis}
 \label{tab:LHS_ANOVA_agLead}
 \begin{tabular}{@{\vrule height 10.5pt depth4pt width0pt}lrrrrrr}
@@ -602,30 +1028,30 @@ Fraction of initial infecteds ($I_0$) in tropics		&	0.0$-$1.0\\
 \end{table*}
 
 \begin{figure*}[h!]
-\centerline{\includegraphics[width=7in]{./manuscript/figures/univariate_summary/univariate_summary.pdf}}
-\caption{Univariate sensitivity analysis showing effects of individual parameters on (A) the antigenic lead and (B) the fraction of the phylogenetic trunk in the tropics. 
+\centerline{\includegraphics{manuscript/figures/univariate_summary/univariate_summary.pdf}}
+\caption{Univariate sensitivity analysis showing effects of individual parameters on (\textit{a}) the antigenic lead and (\textit{b}) the fraction of the phylogenetic trunk in the tropics. 
 In each column of plots, only the parameter indicated on the x-axis is varying; all others are held constant at the default value. 
 Each point represents the mean value over a single simulation. 
 Blue lines indicate linear least squares regression. 
-The dashed lines represent the null hypotheses where (A) the trunk is distributed equally among the three regions or (B) tropical strains are neither antigenically ahead or behind. 
-(C) Number of simulations that went extinct (red), exceeded the TMRCA limit (green), or were suitable for analysis (blue).}
+The dashed lines represent the null hypotheses where (\textit{a}) the trunk is distributed equally among the three regions or (\textit{b}) tropical strains are neither antigenically ahead or behind. 
+(\textit{c}) Number of simulations that went extinct (red), exceeded the TMRCA limit (green), or were suitable for analysis (blue).}
 \label{fig:univariate_summary}
 \end{figure*}
 
 \newpage
 \begin{figure*}[h!]
-\centerline{\includegraphics[width=7in]{./manuscript/figures/LHS_summary/LHS_summary.pdf}}
-\caption{Multivariate sensitivity analysis showing effects of individual parameters on the (A) antigenic lead and (B) the fraction of the phylogenetic trunk in the tropics. 
+\centerline{\includegraphics{manuscript/figures/LHS_summary/LHS_summary.pdf}}
+\caption{Multivariate sensitivity analysis showing effects of individual parameters on the (\textit{a}) antigenic lead and (\textit{b}) the fraction of the phylogenetic trunk in the tropics. 
 Horizontal axes are projections of a Latin hypercube with dimensions corresponding to the five parameters indicated. 
 Each point shows the mean value over a single simulation. 
-The dashed lines represent the null hypotheses where (A) the trunk is distributed equally among the three regions or (B) tropical strains are neither antigenically ahead or behind. 
+The dashed lines represent the null hypotheses where (\textit{a}) the trunk is distributed equally among the three regions or (\textit{b}) tropical strains are neither antigenically ahead or behind. 
 Pearson's correlation coefficients and associated 95\% confidence intervals are indicated.}
 \label{fig:LHS_summary}
 \end{figure*}
 
 \newpage
 \begin{figure*}[h!]
-\centerline{\includegraphics[width=3.42in]{./manuscript/figures/R0_drift/R0_drift.pdf}}
+\centerline{\includegraphics{manuscript/figures/R0_drift/R0_drift.pdf}}
 \caption{Effect of $R_0$ on antigenic drift in a single deme. 
 Each point shows the mean antigenic drift rate from a single simulation. 
 The blue line represents linear least squares regression, and the dashed line indicates the empirical estimate of the rate of antigenic drift for H3N2 \cite{Bedford:2014bf}. 
@@ -635,7 +1061,7 @@ Pearson's $r = 0.94$, $p < 0.001$; 95\% CI: (0.88, 0.97).}
 
 \newpage
 \begin{figure*}[h!]
-\centerline{\includegraphics[width=3.42in]{./manuscript/figures/R0_selection/R0_selection.pdf}}
+\centerline{\includegraphics{manuscript/figures/R0_selection/R0_selection.pdf}}
 \caption{Relationship between $R_0$ and the selection coefficient for an invading strain with the resident at endemic equilibrium. 
 The relationship for three different antigenic distances $d$ between the invading strain and the resident strain is shown: 0.6 (solid line), 1.0 (dashed line), or 2.0 (dotted line) antigenic units.}
 \label{fig:R0_selection}
@@ -643,7 +1069,7 @@ The relationship for three different antigenic distances $d$ between the invadin
 
 \newpage
 \begin{figure*}[h!]
-\centerline{\includegraphics[width=3.42in]{./manuscript/figures/I0_endYear/I0_endYear.pdf}}
+\centerline{\includegraphics{manuscript/figures/I0_endYear/I0_endYear.pdf}}
 \caption{Effect of initial conditions on the antigenic lead and the fraction of the trunk in the tropics early in the simulation. 
 Each square represents the average value for n=5 to 11 replicate simulations.}
 \label{fig:I0_endYear}
@@ -651,33 +1077,60 @@ Each square represents the average value for n=5 to 11 replicate simulations.}
 
 \newpage
 \begin{figure*}[h!]
-\centerline{\includegraphics[width=7in]{./manuscript/figures/sensitivity_analysis/sensitivity_analysis.pdf}}
-\caption{Sensitivity of flu-like behavior to changes in the mutational parameters, the mutation rate $\mu$, mean mutation size $\delta_\text{mean}$, and standard deviation of the mutation size $\delta_\text{sd}$. 
-Each square represents ten replicate simulations. 
-The number of simulations where the virus went extinct is shown in the second column, and the number of simulations where the viral population exceeded a TMRCA of 10 years is shown in the third column. 
-The remaining simulations are considered influenza-like and are shown in the first column. 
-The reported mean antigenic drift rates and prevalences are averages over the influenza-like replicates.}
+\centerline{\includegraphics{manuscript/figures/sensitivity_analysis/sensitivity_analysis.pdf}}
+\caption{Sensitivity of influenza-like behaviour to changes in the mutational parameters, the mutation rate $\mu$, mean mutation size $\delta_\text{mean}$, and standard deviation of the mutation size $\delta_\text{sd}$. 
+Within each plot, each square represents ten replicate simulations. 
+Each row of plots shows results from simulations using different mutation rates $\mu$.
+The number of simulations where the virus went extinct is shown in the second column of plots, and the number of simulations where the viral population exceeded a TMRCA of 10 years is shown in the third column of plots. 
+The remaining simulations are considered influenza-like and are shown in the first column of plots. 
+The reported mean antigenic drift rates and prevalences are averaged over the influenza-like replicates.
+The color scales for mean antigenic drift and incidence are centered (white) at the  observed values for H3N2 (table 1).}
 \label{fig:sensitivity_analysis}
 \end{figure*}
 
 \newpage
 \begin{figure*}[h!]
-\centerline{\includegraphics[width=3.42in]{./manuscript/figures/SIR_seropositivity/SIR_seropositivity.pdf}}
+\centerline{\includegraphics{manuscript/figures/SIR_seropositivity/SIR_seropositivity.pdf}}
 \caption{Theoretical increase in the fraction of seropositive individuals with age with $R_0=1.8$ and a 20\% higher $R_0 = 2.16$.}
 \label{fig:SIR_seropositivity}
 \end{figure*}
 
 \newpage
 \begin{figure*}[h!]
-\centerline{\includegraphics[width=3.42in]{./manuscript/figures/R0_relativeR0/R0_relativeR0.pdf}}
+\centerline{\includegraphics{manuscript/figures/R0_relativeR0/R0_relativeR0.pdf}}
 \caption{Lowering baseline $R_0$ decreases the effect of relative $R_0$ on the fraction of the trunk and antigenic lead in the tropics.
-(A) Effects of baseline and relative $R_0$ on the fraction of the trunk in the tropics. 
+(\textit{a}) Effects of baseline and relative $R_0$ on the fraction of the trunk in the tropics. 
 Blue indicates that the phylogenetic trunk is located in the tropics less than 1/3 of the time, and red indicates that the trunk is the tropics more than 1/3 of the time. 
-(B) Effects of baseline $R_0$ and relative $R_0$ on antigenic lead in the tropics. 
+(\textit{b}) Effects of baseline $R_0$ and relative $R_0$ on antigenic lead in the tropics. 
 Blue indicates that tropical strains are on average ahead antigenically relative to other strains, and red indicates that tropical strains are behind antigenically. 
 Each square represents an average from 1 to 14 replicate simulations.
 Grey squares indicate parameter combinations where all of twenty attempted simulations either went extinct or exceeded the TMRCA threshold of 10 years.}
 \label{fig:R0_relativeR0}
+\end{figure*}
+
+\begin{figure*}[h!]
+\centerline{\includegraphics{manuscript/figures/univariate_summary_5_deme/univariate_summary_5_deme.pdf}}
+\caption{Univariate sensitivity analysis using a fully connected 5-deme model (\textit{a}) showing the effects of individual parameters on (\textit{b}) the antigenic lead and (\textit{c}) the fraction of the phylogenetic trunk in the tropics. 
+By default, the tropics have a population size that is twice as large as any single temperate deme.
+In each column of plots, only the parameter indicated on the x-axis is varying; all others are held constant at the default value. 
+Each point represents the mean value over a single simulation. 
+Blue lines indicate linear least squares regression. 
+The dashed lines represent the null hypotheses where (\textit{b}) the trunk is distributed proportionally to the default population size among the regions or (\textit{c}) tropical strains are neither antigenically ahead or behind. 
+(\textit{d}) Number of simulations that went extinct (red), exceeded the TMRCA limit (green), or were suitable for analysis (blue).}
+\label{fig:univariate_summary_5_deme}
+\end{figure*}
+
+\begin{figure*}[h!]
+\centerline{\includegraphics{manuscript/figures/univariate_summary_6_deme/univariate_summary_6_deme.pdf}}
+\caption{Univariate sensitivity analysis using a fully connected 6-deme model (\textit{a}) showing the effects of individual parameters on (\textit{b}) the antigenic lead and (\textit{c}) the fraction of the phylogenetic trunk in each of the two tropical demes. 
+By default, all demes have the same population size.
+In each column of plots, only the parameter indicated on the x-axis is varying; all others are held constant at the default value. 
+Each point represents the mean value over a single simulation. 
+Black points show results from one tropical deme and red points from the other.
+Blue lines indicate linear least squares regression to the combined data from both tropical demes.
+The dashed lines represent the null hypotheses where (\textit{b}) the trunk is distributed proportionally to the default population size among the regions or (\textit{c}) tropical strains are neither antigenically ahead or behind. 
+(\textit{d}) Number of simulations that went extinct (red), exceeded the TMRCA limit (green), or were suitable for analysis (blue).}
+\label{fig:univariate_summary_6_deme}
 \end{figure*}
 
 \end{document}

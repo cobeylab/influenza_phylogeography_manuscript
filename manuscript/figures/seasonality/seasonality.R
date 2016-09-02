@@ -5,13 +5,14 @@ library(gridExtra)
 library(grid)
 library(scales)
 
-figure_width = 3.425 #(inches)
+figureWidth = 4.5 #(inches)
+aspectRatio = .45
 
 resultsDir = '../../analysis/univariate_analyses'
 plotDir = './'
 
 
-textSize = 6
+textSize = 9
 pointSize = .5
 lineSize = .3
 plot_themes  = 	theme_classic() +
@@ -23,7 +24,7 @@ plot_themes  = 	theme_classic() +
 				theme(axis.text.x=element_text(size= textSize)) + 
 				theme(axis.title.y=element_text(size= textSize)) +
 				theme(axis.text.y=element_text(size= textSize)) +
-				theme(plot.title=element_text(size=textSize+2)) +
+				theme(plot.title=element_text(size=textSize, hjust=-0.25)) +
 				theme(plot.margin=unit(c(1,1,1,1),'mm')) +
 				theme(legend.title=element_text(size=textSize)) +
 				theme(legend.text=element_text(size=textSize)) +
@@ -31,7 +32,8 @@ plot_themes  = 	theme_classic() +
 				theme(legend.direction='horizontal') +
 				theme(legend.margin = unit(-.5,'cm')) +
 				theme(panel.border = element_rect(colour = "black", fill=NA, size=.5)) +
-				theme(axis.line = element_blank())
+				theme(axis.line = element_blank()) + 
+				theme(text = element_text(family='serif')) 
 
 ################################################################################################
 
@@ -49,25 +51,28 @@ agLead.fit = lm(tropicsAgLag~plotDF[,parName], data=plotDF)
 
 agLeadPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsAgLag")) + 
 	geom_point(size = pointSize) + 
-	xlab("Seasonal amplitude") + 
-	ylab("Tropics antigenic lead") + 
+	xlab("seasonal amplitude") + 
+	ylab("tropics antigenic lead") + 
 	ylim(c(-0.4,0.4)) +
 	stat_smooth(method="lm",se=FALSE,size=lineSize) +
 	geom_hline(aes(yintercept=0.0),linetype=2, size = lineSize) + 
-	plot_themes + ggtitle('B') + theme(plot.title=element_text(hjust=-.2))
+	#scale_x_continuous(breaks=c(0,0.10,0.20)) +
+	plot_themes + 
+	ggtitle(expression(paste("(",italic(b),")"))) 
 
 trunkPro.corr = cor.test(plotDF[, parName],plotDF$tropicsTrunkPro)
 trunkPro.fit = lm(tropicsTrunkPro~plotDF[,parName], data=plotDF)
 
 trunkProPlot = ggplot(plotDF, aes_string(x=parName,y="tropicsTrunkPro")) + 
 	geom_point(size = pointSize) + 
-	xlab("Seasonal amplitude") + 
-	ylab("Tropics trunk proportion") + 
+	xlab("seasonal amplitude") + 
+	ylab("tropics trunk proportion") + 
 	ylim(c(0,1)) + 
 	stat_smooth(method="lm",se=FALSE,size=lineSize) +
 	geom_hline(aes(yintercept=1/3),linetype=2, size = lineSize) +
+	#scale_x_continuous(breaks=c(0,0.10,0.20))+
 	plot_themes +
-	ggtitle("A") + theme(plot.title=element_text(hjust=-.2))
+	ggtitle(expression(paste("(",italic(a),")"))) 
 
 dbDisconnect(comboDb)
 
@@ -75,7 +80,7 @@ plots = list(trunkProPlot,agLeadPlot)
 args_list = c(plots,1,2)
 names(args_list)=c(letters[1:length(plots)],'nrow','ncol')
 
-pdf(paste(plotDir,'seasonality.pdf',sep='/'), width = figure_width, height = figure_width * 0.55)
+pdf(paste(plotDir,'seasonality.pdf',sep='/'), width = figureWidth, height = figureWidth * aspectRatio)
 do.call(grid.arrange,args_list)
 dev.off()
 

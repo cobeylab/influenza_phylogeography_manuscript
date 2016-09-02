@@ -54,7 +54,8 @@ for(distance in DISTANCES){
 		Scalc = c(Scalc,(R0-1)*(gamma*smithConv*distance+birthRate))
 	}
 	if(FIRST){
-		plot(R0S,S,type='l',ylab=expression(paste('Selection coefficient ',italic('s'))),xlab=expression(italic('R'[0])),ylim=c(0,.06),lty=i)
+		par(family='serif')
+		plot(R0S,S,type='l',ylab=expression(paste('selection coefficient ',italic('s'))),xlab=expression(italic('R'[0])),ylim=c(0,.06),lty=i,)
 		FIRST=FALSE
 	}
 	else{

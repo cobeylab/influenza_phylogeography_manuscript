@@ -52,6 +52,9 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 }
 ######################
 
+figureWidth = 5 #inches
+aspectRatio = 0.8
+
 resultsDir = '../../analysis/default_params/'
 plotDir = './'
 exampleDir = paste(resultsDir,'6',sep='')		
@@ -61,7 +64,7 @@ timeseries = read.csv(paste(exampleDir,'/out.timeseries',sep=''),sep='\t')
 prevalence = cbind(timeseries$date,data.frame(timeseries$northI/timeseries$northN, timeseries$tropicsI/timeseries$tropicsN, timeseries$southI/timeseries$southN)*10^5)
 names(prevalence) = c('year','north','tropics','south')
 
-textSize = 6
+textSize = 9
 plot_themes  = 	theme_classic() +
 				theme(axis.line = element_line(size=.2)) +
 				theme(axis.ticks = element_line(size=.2)) +
@@ -70,13 +73,14 @@ plot_themes  = 	theme_classic() +
 				theme(axis.text.x=element_text(size= textSize)) + 
 				theme(axis.title.y=element_text(size= textSize)) +
 				theme(axis.text.y=element_text(size= textSize)) +
-				theme(plot.title=element_text(size=textSize+2)) +
-				theme(plot.margin=unit(c(.1,0,-1.2,0),'cm')) +
+				theme(plot.title=element_text(size=textSize)) +
+				theme(plot.margin=unit(c(.1,0,-1.0,0),'cm')) +
 				theme(legend.title=element_text(size=textSize)) +
 				theme(legend.text=element_text(size=textSize)) +
 				theme(legend.position ='bottom') +
 				theme(legend.direction='horizontal') +
-				theme(legend.margin = unit(0,'cm'))
+				theme(legend.margin = unit(0,'cm')) +
+				theme(text = element_text(family='serif')) 
 
 zoom_themes = theme(legend.position="none", axis.line=element_blank(),axis.text.x=element_blank(),
             axis.text.y=element_blank(),axis.ticks=element_blank(),
@@ -112,13 +116,16 @@ yeardistancePlotFull = ggplot(data = plotDF, aes(x=year, y=distance)) +
 				geom_point(colour = regionColors[plotDF$loc +1], size = 0.1) +
 				geom_smooth(method='loess',colour = 'black',size=0.2,se=FALSE,span=0.25) +
 				ylab('Antigenic distance from founder') +
-				xlab('Year') +
+				xlab('year') +
 				plot_themes +
-				ggtitle('B') + theme(plot.title=element_text(hjust=-.2)) +
-				geom_rect(aes(xmin = ydXlim[1], xmax= ydXlim[2],ymin= ydYlim[1], ymax= ydYlim[2]),color='black',fill='transparent', size = .2)
+				ggtitle(expression(paste("(",italic(b),")"))) +  
+				theme(plot.title=element_text(hjust=-.25)) +
+				geom_rect(aes(xmin = ydXlim[1], xmax= ydXlim[2],ymin= ydYlim[1], ymax= ydYlim[2]),color='black',fill='transparent', size = .2) +
+				theme(plot.margin=unit(c(.1,0,-1.0,.5),'cm')) 
+
 
 yeardistancePlotZoom = ggplot(data = plotDF, aes(x=year, y=distance)) +
-				geom_point(colour = regionColors[plotDF$loc +1], size = 0.2) +
+				geom_point(colour = regionColors[plotDF$loc +1], size = 0.1) +
 				geom_smooth(method='loess',colour = 'black',size=0.5,se=FALSE,span=0.25) +
 				coord_cartesian(xlim= ydXlim, ylim= ydYlim) + zoom_themes
 				
@@ -131,11 +138,12 @@ treePlotFull = ggplot(data = branches) +
 			geom_segment(data = branches, mapping = aes(x = parentyear, y = layout, xend = parentyear,yend = parentlayout), colour = regionColors[branches$loc+1], size= .1) +
 			plot_themes +
 			ylab(NULL) +
-			xlab('Year') +
+			xlab('year') +
 			theme(axis.line.y = element_blank()) +
 			theme(axis.ticks.y = element_blank()) +
 			theme(axis.text.y = element_blank()) +
-			ggtitle('A') + theme(plot.title=element_text(hjust=0)) +
+			ggtitle(expression(paste("(",italic(a),")"))) +  
+			theme(plot.title=element_text(hjust=0)) +
 			geom_rect(aes(xmin = treeXlim[1], xmax=treeXlim[2],ymin=treeYlim[1], ymax=treeYlim[2]),color='black',fill='transparent', size = .3)
 
 trunkBranches = branches[branches$trunk==1,]
@@ -154,12 +162,13 @@ prevalencePlot = ggplot(data = prevalence) +
 					geom_line(mapping = aes(x=year, y=tropics), colour = regionColors[2], size =0.3) + 
 					geom_line(mapping = aes(x=year, y=south), colour = regionColors[3], size =0.3) +
 					plot_themes +
-					xlab('Year') +
-					ylab('Prevalence per 100k') +
+					xlab('year') +
+					ylab(expression('prevalence per 10'^5)) +
 					theme(aspect.ratio=0.25) +
-					theme(plot.margin=unit(c(0,1.8,-1.5,0),'cm')) +
-					ggtitle('C') + theme(plot.title=element_text(hjust=-.17,margin=margin(t = -1, b=12))) 
+					theme(plot.margin=unit(c(0,2,-1,0),'cm')) +
+					ggtitle(expression(paste("(",italic(c),")"))) +  
+					theme(plot.title=element_text(hjust=-.15,margin=margin(t = -1, b=12))) 
 
-pdf(paste(plotDir,'example_run.pdf',sep=''),width = 3.425,height = 3.425)
+pdf(paste(plotDir,'example_run.pdf',sep=''),width = figureWidth,height = figureWidth*aspectRatio)
 multiplot(treePlot, yeardistancePlot, prevalencePlot, layout = matrix(c(1,2,3,3), nrow=2, byrow=TRUE))
 dev.off()

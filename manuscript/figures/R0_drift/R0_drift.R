@@ -15,7 +15,7 @@ resultsDir = '../../analysis/R0_drift'
 resultsDb = paste(resultsDir,'results.sqlite',sep='/')
 plotDir = './'
 
-textSize = 6
+textSize = 9
 pointSize = 1
 lineSize = .8
 plot_themes  = 	theme_classic() +
@@ -35,7 +35,8 @@ plot_themes  = 	theme_classic() +
 				theme(legend.direction='horizontal') +
 				theme(legend.margin = unit(-.5,'cm')) +
 				theme(panel.border = element_rect(colour = "black", fill=NA, size=.5)) +
-				theme(axis.line = element_blank())
+				theme(axis.line = element_blank()) +
+				theme(text=element_text(family='serif'))
 
 
 comboDb = dbConnect(SQLite(), dbname = resultsDb)
@@ -59,7 +60,7 @@ xLocation = (((max(plotDF[, parName])-min(plotDF[, parName]))/5+min(plotDF[, par
 R0Plot = ggplot(plotDF, aes_string(x=parName,y="meanFluxRate")) + 
 	geom_point(size = pointSize*2) +
 	xlab(expression(italic("R"[0]))) + 
-	ylab("Mean antigenic drift rate\n(antigenic units per year)") + 
+	ylab("mean antigenic drift rate\n(antigenic units per year)") + 
 	ylim(c(0,2)) + 
 	stat_smooth(method="lm",se=FALSE,size=lineSize) +
 	geom_hline(aes(yintercept=1.01),linetype=2) +

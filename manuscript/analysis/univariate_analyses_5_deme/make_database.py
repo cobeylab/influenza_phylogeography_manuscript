@@ -145,11 +145,11 @@ if __name__ == "__main__":
     comboDb.execute("CREATE TABLE status (runId INTEGER, extinct INTEGER, excessDiversity INTEGER, fluLike INTEGER);")
     comboDb.execute("CREATE TABLE meanTMRCA (runId INTEGER, meanTMRCA REAL);")
     comboDb.execute("CREATE TABLE meanFluxRate (runId INTEGER, meanFluxRate REAL);")
-    comboDb.execute("CREATE TABLE antigenicLagAg1 (runId INTEGER, lowerTropics1 REAL, tropics1 REAL, upperTropics1 REAL, lowerTropics2 REAL, tropics2 REAL, upperTropics2 REAL, lowerNorth1 REAL, north1 REAL, upperNorth1 REAL, lowerNorth2 REAL, north2 REAL, upperNorth2 REAL, lowerSouth1 REAL, south1 REAL, upperSouth1 REAL, lowerSouth2 REAL, south2 REAL, upperSouth2 REAL);")
-    comboDb.execute("CREATE TABLE trunkProportions (runId INTEGER, tropics1 REAL, tropics2 REAL, north1 REAL, north2 REAL, south1 REAL, south2 REAL);" )
+    comboDb.execute("CREATE TABLE antigenicLagAg1 (runId INTEGER, lowerTropics REAL, tropics REAL, upperTropics REAL, lowerNorth1 REAL, north1 REAL, upperNorth1 REAL, lowerNorth2 REAL, north2 REAL, upperNorth2 REAL, lowerSouth1 REAL, south1 REAL, upperSouth1 REAL, lowerSouth2 REAL, south2 REAL, upperSouth2 REAL);")
+    comboDb.execute("CREATE TABLE trunkProportions (runId INTEGER, tropics REAL, north1 REAL, north2 REAL, south1 REAL, south2 REAL);" )
     comboDb.execute("CREATE TABLE meanAnnualIncidence (runId INTEGER, meanAnnualIncidence REAL);")
     comboDb.execute(
-        "CREATE TABLE pooled_results (runId INTEGER, {0}, extinct INTEGER, excessDiversity INTEGER, fluLike INTEGER, meanFluxRate REAL, tropics1AgLag REAL, tropics1TrunkPro REAL, meanAnnualIncidence REAL, meanTMRCA REAL);".format(
+        "CREATE TABLE pooled_results (runId INTEGER, {0}, extinct INTEGER, excessDiversity INTEGER, fluLike INTEGER, meanFluxRate REAL, tropicsAgLag REAL, tropicsTrunkPro REAL, meanAnnualIncidence REAL, meanTMRCA REAL);".format(
             ', '.join([paramName + ' ' + PARAM_TYPES[paramName] for paramName in PARAMS])
         )
     )

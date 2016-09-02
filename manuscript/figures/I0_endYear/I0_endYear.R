@@ -11,8 +11,10 @@ library(plyr)
 resultsDir = '../../analysis/I0_endYear/'
 plotDir = './'
 
-figure_width=3.425
-textSize = 6
+figureWidth = 4.5 #(inches)
+aspectRatio = 0.6
+
+textSize = 9
 pointSize = 1.2
 lineSize = .3
 plot_themes  = 	theme_classic() +
@@ -24,15 +26,16 @@ plot_themes  = 	theme_classic() +
 				theme(axis.text.x=element_text(size= textSize)) + 
 				theme(axis.title.y=element_text(size= textSize)) +
 				theme(axis.text.y=element_text(size= textSize)) +
-				theme(plot.title=element_text(size=textSize+2)) +
+				theme(plot.title=element_text(size=textSize, hjust=-0.15)) +
 				theme(plot.margin=unit(c(1,1,1,1),'mm')) +
-				theme(legend.title=element_text(size=textSize)) +
-				theme(legend.text=element_text(size=textSize)) +
+				theme(legend.title=element_text(size=9)) +
+				theme(legend.text=element_text(size=9)) +
 				theme(legend.position ='bottom') +
 				theme(legend.direction='horizontal') +
 				theme(legend.margin = unit(0,'cm')) +
 				theme(panel.border = element_rect(colour = "black", fill=NA, size=.5)) +
-				theme(axis.line = element_blank())
+				theme(axis.line = element_blank()) +
+				theme(text = element_text(family='serif')) 
 
 resultsDb = paste(resultsDir,'results.sqlite',sep='')
 parNames = c('tropicFractionI0','endYear')
@@ -48,15 +51,15 @@ parName1 = parNames[1]
 parName2 = parNames[2]
 trunkProPlot2D = ggplot(plotDF, aes_string(x=parName1,y=parName2)) + 
 	geom_tile(aes(fill= tropicsTrunkPro)) + 
-	scale_fill_gradientn("Tropics trunk proportion",
+	scale_fill_gradientn("tropics trunk proportion",
 					colours = c('#2A4A7F',"white","#800000"),
 					values = rescale(c(0,1/3,1)),
 					limits = c(0,1)) + 
-	guides(fill=guide_colorbar(barwidth=5,barheight=0.2, title.position = 'top')) +
-	xlab('Fraction of initial infecteds in tropics') + 
-	ylab('Duration of simulation (years)') + 
-	plot_themes + theme(legend.title = element_text(size = 6, face ='plain')) +
-	ggtitle("A") + theme(plot.title=element_text(hjust=-.15)) +
+	guides(fill=guide_colorbar(barwidth=8,barheight=0.4, title.position = 'top')) +
+	xlab('fraction of initial infecteds in tropics') + 
+	ylab('duration of simulation (years)') + 
+	plot_themes +
+	ggtitle(expression(paste("(",italic(a),")"))) +
 	scale_x_continuous(expand = c(0,0)) +
 	scale_y_continuous(expand = c(0,0)) +
 	theme(panel.border = element_rect(colour = "black", fill=NA, size=.2)) +
@@ -64,21 +67,21 @@ trunkProPlot2D = ggplot(plotDF, aes_string(x=parName1,y=parName2)) +
 
 agLagPlot2D = ggplot(plotDF, aes_string(x=parName1,y=parName2)) + 
 	geom_tile(aes(fill= tropicsAgLag)) + 
-	scale_fill_gradientn("Tropics antigenic lead",
+	scale_fill_gradientn("tropics antigenic lead",
 						colours = c('#2A4A7F',"white","#800000"),
 						values = rescale(c(-.1,0,.1)),
 						limits = c(-.1,.1)) + 
-	guides(fill=guide_colorbar(barwidth=5,barheight=0.2, title.position = 'top')) +
-	xlab('Fraction of initial infecteds in tropics') + 
-	ylab('Duration of simulation (years)') + 
-	plot_themes + theme(legend.title = element_text(size = 6, face ='plain')) +
-	ggtitle("B") + theme(plot.title=element_text(hjust=-.15)) +	
+	guides(fill=guide_colorbar(barwidth=8,barheight=0.4, title.position = 'top')) +
+	xlab('fraction of initial infecteds in tropics') + 
+	ylab('duration of simulation (years)') + 
+	plot_themes +
+	ggtitle(expression(paste("(",italic(b),")"))) +
 	scale_x_continuous(expand = c(0,0)) +
 	scale_y_continuous(expand = c(0,0)) +
 	theme(panel.border = element_rect(colour = "black", fill=NA, size=.2)) +
 	theme(axis.ticks = element_line(size=.1)) 
 
-pdf('./I0_endYear.pdf', width = figure_width, height = figure_width *.65) #inches
+pdf('./I0_endYear.pdf', width = figureWidth, height = figureWidth *aspectRatio) #inches
 plots = list(trunkProPlot2D, agLagPlot2D)
 args_list = c(plots,1,2)
 names(args_list)=c(letters[1:length(plots)],'nrow','ncol')
